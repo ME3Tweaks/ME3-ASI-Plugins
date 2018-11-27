@@ -22,7 +22,7 @@
     <ProjectGuid>{BD1404C7-84A2-4733-99E4-5FDFFD3235FE}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>VaryingMPMaxEnemies</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -163,7 +163,7 @@
     <ClCompile Include="VaryingEnemyCount.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="C:\Users\mgame\Downloads\detours.lib" />
+    <Library Include="..\detours.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

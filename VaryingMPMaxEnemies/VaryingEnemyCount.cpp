@@ -6,89 +6,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #pragma comment(lib, "detours.lib") //Library needed for Hooking part.
 
-//#include <string.h>
-//#include <windows.h>
-//#include <winsock.h>
-//#include <conio.h>
-toolkit::VMTHook* hook;
-TArray< UObject* >*     GObjObjects = NULL;
-//typedef void(__stdcall *ProcessEvent) (UFunction*, void*, void*);
-
-DWORD ProcessEventOrig;
-UFunction *pUFunc = NULL;
-void      *pParms = NULL;
-void      *pResult = NULL;
-UFunction	  *pCallObject = NULL;
-UFunction* pWaveStartFunc = NULL;
-int originalMaxEnemies = 0;
-PDWORD dwOldVMT = NULL;
-FILE *f = NULL;
-
-void __declspec(naked) ProcessEventHooked()
-{
-	__asm mov pCallObject, ecx;
-	__asm
-	{
-		push eax
-		mov eax, dword ptr[esp + 0x8]
-		mov pUFunc, eax
-		mov eax, dword ptr[esp + 0xC]
-		mov pParms, eax
-		mov eax, dword ptr[esp + 0x10]
-		mov pResult, eax
-		pop eax
-	}
-	__asm pushad
-	if (pUFunc)
-	{
-		printf(pCallObject->GetFullName());
-		//if (strstr(pCallObject->GetFullName(), "Function sfxgamempcontent.SFXWave_Horde.InitializeWave"))
-		//{
-		//	printf("InitializeWave() has been called");
-		//}
-
-
-		/*
-		Perform logic here for function that was hooked.
-		This is called before the event is processed.
-		*/
-		//printf("Hook event has been called.\n");
-
-		//UObject* maxEnemiesObj = UObject::FindObject<UObject>("IntProperty sfxgamempcontent.SFXWave_Horde.MaxEnemies");
-		//if (maxEnemiesObj) {
-			//printf("Found horde count\n");
-			//UIntProperty* maxEnemiesProperty = static_cast<UIntProperty*> (maxEnemiesObj);
-			//printf("Casted to maxEnemiesProperty\n");
-
-			//if (originalMaxEnemies == 0) {
-		//		printf("Dereferenced maxenemiesProperty: %d\n", *maxEnemiesProperty);
-				//originalMaxEnemies = horde->MaxEnemies;
-			//}
-			//int fuzzy = rand() % 4 + 1;
-			//printf("Generated fuzzy number\n");
-
-			//USFXWave_Horde: public Usfxwave
-			//horde->MaxEnemies = originalMaxEnemies + 4 - fuzzy;
-			//printf("Set max enemies to %d\n",horde->MaxEnemies);
-		//}
-
-	}
-	__asm popad
-	__asm
-	{
-		push pResult
-		push pParms
-		push pUFunc
-		call ProcessEventOrig
-		retn 0xC
-	}
-}
-
 typedef void(__thiscall *tProcessEvent)(class UObject *, class UFunction *, void *, void *);
 tProcessEvent ProcessEvent = (tProcessEvent)0x00453120;
-//char* tick = (char*) "Tick";
-
-
 
 bool isPartOf(char* w1, char* w2)
 {
@@ -239,6 +158,7 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 		printf("[%lu.%d] ", secondsSinceBoot, ms);
 		printf(op->GetFullName());
 		printf("_%d",op->NetIndex);
+		//op->
 		//printf("Count: %d\n", op->m_aObjComment.Count);
 		//printf("Max: %d\n", op->m_aObjComment.Max);
 		//int i = 0;
