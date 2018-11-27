@@ -26,14 +26,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="VaryingEnemyCount.cpp">
+    <ClCompile Include="..\VMTDetour\vmthooks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\VMTDetour\vmthooks.cpp">
+    <ClCompile Include="KismetLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="C:\Users\mgame\Downloads\detours.lib" />
+    <Library Include="..\detours.lib" />
   </ItemGroup>
 </Project>

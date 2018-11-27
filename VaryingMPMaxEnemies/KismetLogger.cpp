@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <io.h>
+#include <fcntl.h>     /* for _O_TEXT and _O_BINARY */  
 #include "..\ME3SDK\SdkHeaders.h"
 #include "..\VMTDetour\vmthooks.h"
 #include "detours.h"
@@ -97,7 +99,7 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 		//FString* result = (FString*)pResult;
 		//wprintf((wchar_t*)(result->Data));
 	}
-	else */ if (isPartOf(szName, "Function Engine.GameInfo.ProcessClientTravel")) {
+	else if (isPartOf(szName, "Function Engine.GameInfo.ProcessClientTravel")) {
 		FString travelURL = ((AGameInfo_execProcessClientTravel_Parms*)(pParms))->URL;
 		FGuid nextMapGuid = ((AGameInfo_execProcessClientTravel_Parms*)(pParms))->NextMapGuid;
 
@@ -149,7 +151,7 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 		ProcessEvent(pObject, pFunction, pParms, pResult);
 		printf("New GRIMP status: %c\n", grimp->GameStatus);
 	}
-	else if (isPartOf(szName, "Function Engine.SequenceOp.Activated")) {
+	else*/ if (isPartOf(szName, "Function Engine.SequenceOp.Activated")) {
 		//printf(szName);
 		USequenceOp* op = (USequenceOp*)pObject;
 		ULONGLONG currenttime = GetTickCount64();
@@ -163,18 +165,19 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 		//printf("Max: %d\n", op->m_aObjComment.Max);
 		//int i = 0;
 
-		for (unsigned int a = 0; a < op->m_aObjComment.Count; a++) {
-			wprintf(op->m_aObjComment(0).Data);
-		}
+		//for (unsigned int a = 0; a < op->m_aObjComment.Count; a++) {
+		//	wprintf(op->m_aObjComment(0).Data);
+		//}
 		printf("\n");
 
 		ProcessEvent(pObject, pFunction, pParms, pResult);
 	}
 	else {
-		if (isPartOf(szName, "Travel")) {
+
+		/*if (isPartOf(szName, "Travel") || isPartOf(szName, "Sequence")) {
 			printf(szName);
 			printf("\n");
-		}
+		}*/
 		ProcessEvent(pObject, pFunction, pParms, pResult);
 	}
 	//else if ((isPartOf(szName, "HTTP") || isPartOf(szName, "Online")) && !isPartOf(szName, "Tick") && !isPartOf(szName, "MultiplayerFlow")) {
@@ -206,15 +209,29 @@ void onAttach()
 	boottime = GetTickCount64();
 	AllocConsole();
 	AttachConsole(GetCurrentProcessId());
-	freopen("CON", "w", stdout);
-	printf("ATTACHED DLL.\n");
+	
+	// Get STDOUT handle
+	HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	int SystemOutput = _open_osfhandle(intptr_t(ConsoleOutput), _O_TEXT);
+	FILE *COutputHandle = _fdopen(SystemOutput, "w");
+
+	// Get STDERR handle
+	HANDLE ConsoleError = GetStdHandle(STD_ERROR_HANDLE);
+	int SystemError = _open_osfhandle(intptr_t(ConsoleError), _O_TEXT);
+	FILE *CErrorHandle = _fdopen(SystemError, "w");
+
+	// Redirect the CRT standard input, output, and error handles to the console
+	freopen_s(&COutputHandle, "CONOUT$", "w", stdout);
+	freopen_s(&CErrorHandle, "CONOUT$", "w", stderr);
+
+
+	printf("ME3Tweaks Kismet Logger for Mass Effect 3\n");
+	printf("By Mgamerz\n");
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread()); //This command set the current working thread to the game current thread.
 	DetourAttach(&(PVOID&)ProcessEvent, HookedPE); //This command will start your Hook.
 	DetourTransactionCommit();
-
-	printf("END OF ONATTACHED()\n");
 }
 
 BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
