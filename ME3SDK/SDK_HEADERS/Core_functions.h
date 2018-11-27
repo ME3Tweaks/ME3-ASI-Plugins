@@ -263,7 +263,6 @@ int UCommandlet::eventMain ( struct FString Params )
 	return Main_Parms.ReturnValue;
 };
 
-
 #ifdef _MSC_VER
 	#pragma pack ( pop )
 #endif
