@@ -196,6 +196,20 @@ void onAttach()
 	DetourTransactionCommit();
 }
 
+BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
+{
+	switch (dwReason)
+	{
+	case DLL_PROCESS_ATTACH:
+		DisableThreadLibraryCalls(hModule);
+		CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)onAttach, NULL, 0, NULL);
+		return true;
+		break;
 
+	case DLL_PROCESS_DETACH:
+		return true;
+		break;
+	}
+	return true;
 };
 
