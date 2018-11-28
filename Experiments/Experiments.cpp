@@ -6,190 +6,159 @@
 #include <iostream>
 #include <ostream>
 #include <streambuf>
+#include <shlwapi.h>
+
 #include "..\ME3SDK\ME3TweaksHeader.h"
 #include "..\ME3SDK\SdkHeaders.h"
 #include "..\detours\detours.h"
 
-
 #define _CRT_SECURE_NO_WARNINGS
 #pragma comment(lib, "detours.lib") //Library needed for Hooking part.
 
-ULONGLONG boottime = 0;
-int loopCheck = 1;
+ME3TweaksASILogger logger("Galaxy At Work Logger", "GAWLog.txt");
 
 void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void *pParms, void *pResult)
 {
 	char *szName = pFunction->GetFullName();
-	/*if (isPartOf(szName, "Function SFXOnlineFoundation.SFXOnlineHTTPRequest")) {
+	//if (isPartOf(szName, "Function SFXGame.SFXOnlineComponentUI.UpdateGalaxyAtWarLevel")) {
+	//	logger.writeToLog(string_format("%s\n", szName), true);
+	//	USFXOnlineComponentUI_eventUpdateGalaxyAtWarLevel_Parms* parms = (USFXOnlineComponentUI_eventUpdateGalaxyAtWarLevel_Parms*)pParms;
+	//	logger.writeToLog(string_format("  NewLevel: %d\n", parms->newLevel), true);
+	//	parms->newLevel = 1.0f;
+	//	logger.writeToLog(string_format("  >> NewLevel: %d\n", parms->newLevel), true);
 
-		printf(szName);
-		printf("\n");
+	//} else
+	if (isPartOf(szName, "Function SFXGame.SFXOnlineComponentUI.UpdateGalaxyAtWarLevel")) {
+		logger.writeToLog(string_format("%s\n", szName), true);
+		USFXOnlineComponentUI_eventUpdateGalaxyAtWarLevel_Parms* parms = (USFXOnlineComponentUI_eventUpdateGalaxyAtWarLevel_Parms*)pParms;
+		logger.writeToLog(string_format("  NewLevel: %d\n", parms->newLevel), true);
+		parms->newLevel = 1.0f;
+		logger.writeToLog(string_format("  >> NewLevel: %d\n", parms->newLevel), true);
 
-		//pFunction->eventGenerateParametersString();
-		ProcessEvent(pObject, pFunction, pParms, pResult);
-		USFXOnlineHTTPRequest* request = (USFXOnlineHTTPRequest*)pObject;
-		if (request) {
-			if (loopCheck) {
-				loopCheck = 0;
-				FString baseUrL = request->mURL;
-				FString paramsString = request->eventGenerateParametersString();
-				FString urlBase = request->eventGenerateHeaderParametersString();
-				loopCheck = 1; //no loop
-				//printf("%p\n", (void*)&urlBase);
-				if (baseUrL.Data) {
-					wprintf(baseUrL.Data);
-				}
-				if (paramsString.Data) {
-					wprintf(paramsString.Data);
-					printf("\n");
-				}
-				if (urlBase.Data) {
-					printf("   Headers==============\n");
-					wprintf(urlBase.Data);
-				}
-				printf("\n");
-			}
+	}
+	else if (isPartOf(szName, "Function SFXGame.SFXGAWAssetsHandler.OnGetRatingsComplete")) {
+		//if (isPartOf(szName, "GAW") || isPartOf(szName, "GalaxyAtWar")) {
+			//USequenceOp* op = (USequenceOp*)pObject;
+			//char* fullname = op->GetFullName();
+			//int netindex = op->NetIndex;
+		logger.writeToLog(string_format("%s\n", szName), true);
+		USFXOnlineComponentBlazeNotification_execGetGalaxyAtWarRatingsCompleted_Parms* parms = (USFXOnlineComponentBlazeNotification_execGetGalaxyAtWarRatingsCompleted_Parms*)pParms;
+		logger.writeToLog(string_format("  Error: %d\n", parms->errorCode), true);
+		logger.writeToLog(string_format("  Level: %d\n", parms->Level), true);
+		parms->Level = 26;
+		logger.writeToLog(string_format("  >> Level: %d\n", parms->Level), true);
+
+		logger.writeToLog(string_format("  uSecRatings: %d\n", parms->updatedSecurityRatings.Count), true);
+		for (int i = 0; i < parms->updatedSecurityRatings.Count; i++) {
+			parms->updatedSecurityRatings(i) = i;
+			logger.writeToLog(string_format("   uSecRatings[%d]: %d\n", i, parms->updatedSecurityRatings(i)), true);
 		}
-		//FString* result = (FString*)pResult;
-		//wprintf((wchar_t*)(result->Data));
-	}
-	else if (isPartOf(szName, "Function Engine.GameInfo.ProcessClientTravel")) {
-		FString travelURL = ((AGameInfo_execProcessClientTravel_Parms*)(pParms))->URL;
-		FGuid nextMapGuid = ((AGameInfo_execProcessClientTravel_Parms*)(pParms))->NextMapGuid;
-
-		if (travelURL.Data) {
-			printf("Travel URL: ");
-			wprintf(travelURL.Data);
+		logger.writeToLog(string_format("  uWarAssets: %d\n", parms->updatedWarAssets.Count), true);
+		for (int i = 0; i < parms->updatedWarAssets.Count; i++) {
+			parms->updatedWarAssets(i) = i;
+			logger.writeToLog(string_format("   uWarAssets[%d]: %d\n", i, parms->updatedWarAssets(i)), true);
 		}
-		printf("Next Map GUID: ");
-		printf(GuidToString(nextMapGuid).c_str());
-		ProcessEvent(pObject, pFunction, pParms, pResult);
-	}
-	else if (isPartOf(szName, "Function SFXGame.BioWorldInfo.ServerTravel")) {
-		printf(szName);
-		printf("\n");
-		FString travelURL = ((ABioWorldInfo_eventServerTravel_Parms*)(pParms))->URL;
-		if (travelURL.Data) {
-			printf("Servertravelling with URL: ");
-			wprintf(travelURL.Data);
-			printf("\n");
+
+		for (int i = 0; i < parms->updatedSecurityRatings.Count; i++) {
+			parms->updatedSecurityRatings(i) = i;
+			logger.writeToLog(string_format("  >> uWarAssets[%d]: %d\n", i, parms->updatedSecurityRatings(i)), true);
 		}
-		ProcessEvent(pObject, pFunction, pParms, pResult);
 	}
-	else if (isPartOf(szName, "Function Engine.Actor.GetPackageGuid")) {
-		FName packageName = ((AInfo_execGetPackageGuid_Parms*)(pParms))->PackageName;
-		ProcessEvent(pObject, pFunction, pParms, pResult);
-		FGuid guid = ((AInfo_execGetPackageGuid_Parms*)(pParms))->ReturnValue;
-
-		printf(packageName.GetName());
-		printf(" -> ");
-		printf(GuidToString(guid).c_str());
+	else if (isPartOf(szName, "GAW") || isPartOf(szName, "GaW") || isPartOf(szName, "GalaxyAtWar")) {
+		logger.writeToLog(string_format("%s\n", szName), true);
 	}
-	else if (isPartOf(szName, "Function sfxgamempcontent.sfxgrimp.AddPRI")) {
-		//Player joined
-		printf(szName);
-		printf("\n");
-		ProcessEvent(pObject, pFunction, pParms, pResult);
-
-		Asfxgrimp* grimp = (Asfxgrimp*)pObject;
-		Asfxgrimp_execAddPRI_Parms* params = (Asfxgrimp_execAddPRI_Parms*)pParms;
-		grimp->MaxUniquePlayers = 6;
-		printf("Set number of unique players to 6\n");
-	}
-	else if (isPartOf(szName, "Function sfxgamempcontent.sfxgrimp.SetGameStatus")) {
-		Asfxgrimp* grimp = (Asfxgrimp*)pObject;
-		Asfxgrimp_execSetGameStatus_Parms* settings = (Asfxgrimp_execSetGameStatus_Parms*)pParms;
-		printf(szName);
-		printf("\n");
-		printf("Current GRIMP status: %c\n", grimp->GameStatus);
-		ProcessEvent(pObject, pFunction, pParms, pResult);
-		printf("New GRIMP status: %c\n", grimp->GameStatus);
-	}
-	else*/ if (isPartOf(szName, "Function Engine.SequenceOp.Activated")) {
-	//printf(szName);
-		USequenceOp* op = (USequenceOp*)pObject;
-		ULONGLONG currenttime = GetTickCount64();
-		unsigned long secondsSinceBoot = (currenttime - boottime) / 1000;
-		int ms = (currenttime - boottime) % 1000;
-		std::cout << "[";
-		std::cout << secondsSinceBoot;
-		std::cout << ".";
-		std::cout << ms;
-		std::cout << "] ";
-		std::cout << op->GetFullName();
-		std::cout << "_";
-		std::cout << op->NetIndex;
-		//op->
-		//printf("Count: %d\n", op->m_aObjComment.Count);
-		//printf("Max: %d\n", op->m_aObjComment.Max);
-		//int i = 0;
-
-		//for (unsigned int a = 0; a < op->m_aObjComment.Count; a++) {
-		//	wprintf(op->m_aObjComment(0).Data);
-		//}
-		std::cout << "\n";
-
-		ProcessEvent(pObject, pFunction, pParms, pResult);
-	}
-	else {
-
-		/*if (isPartOf(szName, "Travel") || isPartOf(szName, "Sequence")) {
-			printf(szName);
-			printf("\n");
-		}*/
-		ProcessEvent(pObject, pFunction, pParms, pResult);
-	}
-	//else if ((isPartOf(szName, "HTTP") || isPartOf(szName, "Online")) && !isPartOf(szName, "Tick") && !isPartOf(szName, "MultiplayerFlow")) {
-		/*&& !isPartOf(szName, "SFXTelemetry") && !isPartOf(szName, "Canvas") && !isPartOf(szName, "Render")
-		&& !isPartOf(szName, "PostAdvance") && !isPartOf(szName, ".Update") && !isPartOf(szName, "GetPlayerView") && !isPartOf(szName, "FOV")
-		&& !isPartOf(szName, "SFXGUIInteraction") && !isPartOf(szName, "SFHandler") && !isPartOf(szName, "SFXProfile") && !isPartOf(szName, "IsInMultiplayerFlow")
-		&& !isPartOf(szName, "SFXGameEffect") && !isPartOf(szName, "SFXCamera") && !isPartOf(szName, "SFXWeapon") && !isPartOf(szName, "SFXGame.BioPawn") && !isPartOf(szName, "Engine.Pawn")
-		&& !isPartOf(szName, "IsPlayerPerform") && !isPartOf(szName, ".Timer") && !isPartOf(szName, "InputEvent") && !isPartOf(szName, "SetAnim")
-		&& !isPartOf(szName, "LoadWeap") && !isPartOf(szName, "ScoreInfo") && !isPartOf(szName, "LoadPow") && !isPartOf(szName, "RagdollFai")
-		&& !isPartOf(szName, "Camper") && !isPartOf(szName, "Deferred") && !isPartOf(szName, "CheckPrior") && !isPartOf(szName, "HealthFai")
-		&& !isPartOf(szName, "NavigationPoint") && !isPartOf(szName, "OnInit") && !isPartOf(szName, "PowerCustomAction")) {*/
-		//if (!strcmp(szName, "Function Engine.Actor.Tick") && !strcmp(szName, "Function Engine.Interaction.PostRender")) {
-
-		//printf(szName);
-		//printf("\n");
-
-	//}
-	//
-	//ProcessEvent(pObject, pFunction, pParms, pResult);
-	//FILE *fp = fopen("C:\\Users\\YouUser\\Desktop\\Functions.txt", "w+");
-	//fprintf(fp, "%s\n", szName);
-
+	ProcessEvent(pObject, pFunction, pParms, pResult);
 }
 
+/*if (isPartOf(szName, "Function SFXOnlineFoundation.SFXOnlineHTTPRequest")) {
 
+	printf(szName);
+	printf("\n");
+
+	//pFunction->eventGenerateParametersString();
+	ProcessEvent(pObject, pFunction, pParms, pResult);
+	USFXOnlineHTTPRequest* request = (USFXOnlineHTTPRequest*)pObject;
+	if (request) {
+		if (loopCheck) {
+			loopCheck = 0;
+			FString baseUrL = request->mURL;
+			FString paramsString = request->eventGenerateParametersString();
+			FString urlBase = request->eventGenerateHeaderParametersString();
+			loopCheck = 1; //no loop
+			//printf("%p\n", (void*)&urlBase);
+			if (baseUrL.Data) {
+				wprintf(baseUrL.Data);
+			}
+			if (paramsString.Data) {
+				wprintf(paramsString.Data);
+				printf("\n");
+			}
+			if (urlBase.Data) {
+				printf("   Headers==============\n");
+				wprintf(urlBase.Data);
+			}
+			printf("\n");
+		}
+	}
+	//FString* result = (FString*)pResult;
+	//wprintf((wchar_t*)(result->Data));
+}
+else if (isPartOf(szName, "Function Engine.GameInfo.ProcessClientTravel")) {
+	FString travelURL = ((AGameInfo_execProcessClientTravel_Parms*)(pParms))->URL;
+	FGuid nextMapGuid = ((AGameInfo_execProcessClientTravel_Parms*)(pParms))->NextMapGuid;
+
+	if (travelURL.Data) {
+		printf("Travel URL: ");
+		wprintf(travelURL.Data);
+	}
+	printf("Next Map GUID: ");
+	printf(GuidToString(nextMapGuid).c_str());
+	ProcessEvent(pObject, pFunction, pParms, pResult);
+}
+else if (isPartOf(szName, "Function SFXGame.BioWorldInfo.ServerTravel")) {
+	printf(szName);
+	printf("\n");
+	FString travelURL = ((ABioWorldInfo_eventServerTravel_Parms*)(pParms))->URL;
+	if (travelURL.Data) {
+		printf("Servertravelling with URL: ");
+		wprintf(travelURL.Data);
+		printf("\n");
+	}
+	ProcessEvent(pObject, pFunction, pParms, pResult);
+}
+else if (isPartOf(szName, "Function Engine.Actor.GetPackageGuid")) {
+	FName packageName = ((AInfo_execGetPackageGuid_Parms*)(pParms))->PackageName;
+	ProcessEvent(pObject, pFunction, pParms, pResult);
+	FGuid guid = ((AInfo_execGetPackageGuid_Parms*)(pParms))->ReturnValue;
+
+	printf(packageName.GetName());
+	printf(" -> ");
+	printf(GuidToString(guid).c_str());
+}
+else if (isPartOf(szName, "Function sfxgamempcontent.sfxgrimp.AddPRI")) {
+	//Player joined
+	printf(szName);
+	printf("\n");
+	ProcessEvent(pObject, pFunction, pParms, pResult);
+
+	Asfxgrimp* grimp = (Asfxgrimp*)pObject;
+	Asfxgrimp_execAddPRI_Parms* params = (Asfxgrimp_execAddPRI_Parms*)pParms;
+	grimp->MaxUniquePlayers = 6;
+	printf("Set number of unique players to 6\n");
+}
+else if (isPartOf(szName, "Function sfxgamempcontent.sfxgrimp.SetGameStatus")) {
+	Asfxgrimp* grimp = (Asfxgrimp*)pObject;
+	Asfxgrimp_execSetGameStatus_Parms* settings = (Asfxgrimp_execSetGameStatus_Parms*)pParms;
+	printf(szName);
+	printf("\n");
+	printf("Current GRIMP status: %c\n", grimp->GameStatus);
+	ProcessEvent(pObject, pFunction, pParms, pResult);
+	printf("New GRIMP status: %c\n", grimp->GameStatus);
+}*/
 
 void onAttach()
 {
-	boottime = GetTickCount64();
-	AllocConsole();
-	AttachConsole(GetCurrentProcessId());
-
-	// Get STDOUT handle
-	HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-	int SystemOutput = _open_osfhandle(intptr_t(ConsoleOutput), _O_TEXT);
-	FILE *COutputHandle = _fdopen(SystemOutput, "w");
-
-	// Get STDERR handle
-	HANDLE ConsoleError = GetStdHandle(STD_ERROR_HANDLE);
-	int SystemError = _open_osfhandle(intptr_t(ConsoleError), _O_TEXT);
-	FILE *CErrorHandle = _fdopen(SystemError, "w");
-
-	// Redirect the CRT standard input, output, and error handles to the console
-	freopen_s(&COutputHandle, "CONOUT$", "w", stdout);
-	freopen_s(&CErrorHandle, "CONOUT$", "w", stderr);
-
-	std::ofstream outf("KismetLog.txt");
-	teebuf tb{ outf.rdbuf(), std::cout.rdbuf() };
-	std::streambuf* coutbuf = std::cout.rdbuf(&tb);
-
-	std::cout << "ME3Tweaks Kismet Logger for Mass Effect 3\nBy Mgamerz\n";
-	std::cout.rdbuf(coutbuf); // needs to be replaced as it gets used to flush
-
+	//logger = ME3TweaksASILogger("Kismet Logger", "KismetLog.txt");
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread()); //This command set the current working thread to the game current thread.
 	DetourAttach(&(PVOID&)ProcessEvent, HookedPE); //This command will start your Hook.
