@@ -1,0 +1,39 @@
+ME3Tweaks ASI Logger - By Mgamerz
+Kismet Logger
+[0.0] Logging to E:\Documents\GitHubVisualStudio\FemShep-ME3-ASI-Plugins\KismetLog.txt
+--------------------------------------------------------
+[5.219] SeqEvent_LevelLoaded Prefabs.Gui_Terminal01_Prefab_Seq.SeqEvent_LevelLoaded_267
+[5.219] SeqEvent_LevelLoaded PersistentLevel.Main_Sequence.SeqEvent_LevelLoaded_268
+[10.594] SeqAct_Interp PersistentLevel.Main_Sequence.SeqAct_Interp_240
+[10.594] SeqAct_ToggleHidden PersistentLevel.Main_Sequence.SeqAct_ToggleHidden_250
+[10.594] SeqAct_WwisePostEvent PersistentLevel.Main_Sequence.SeqAct_WwisePostEvent_257
+[10.594] SeqAct_SetFloat PersistentLevel.Main_Sequence.SeqAct_SetFloat_248
+[10.594] SeqAct_Interp PersistentLevel.Main_Sequence.SeqAct_Interp_241
+[10.594] SeqAct_Interp Prefabs.Gui_Terminal01_Prefab_Seq.SeqAct_Interp_238
+[10.891] SeqAct_SetBool Prefabs.Gui_Terminal01_Prefab_Seq.SeqAct_SetBool_243
+[10.891] SeqAct_Gate Prefabs.Gui_Terminal01_Prefab_Seq.SeqAct_Gate_236
+[11.781] SeqEvent_Console PersistentLevel.Main_Sequence.SeqEvent_Console_265
+[11.781] SeqAct_WwisePostEvent PersistentLevel.Main_Sequence.SeqAct_WwisePostEvent_253
+[11.781] SeqAct_WwisePostEvent PersistentLevel.Main_Sequence.SeqAct_WwisePostEvent_256
+[11.781] SeqAct_WwisePostEvent PersistentLevel.Main_Sequence.SeqAct_WwisePostEvent_252
+[11.781] SeqAct_WwisePostEvent PersistentLevel.Main_Sequence.SeqAct_WwisePostEvent_260
+[11.797] SeqAct_Interp PersistentLevel.Main_Sequence.SeqAct_Interp_239
+[16.0] SeqAct_Interp PersistentLevel.Main_Sequence.SeqAct_Interp_242
+[16.531] SeqAct_Gate PersistentLevel.Main_Sequence.SeqAct_Gate_237
+[16.531] GFxAction_OpenMovie PersistentLevel.Main_Sequence.GFxAction_OpenMovie_103
+[16.531] SeqAct_ToggleHidden PersistentLevel.Main_Sequence.SeqAct_ToggleHidden_250
+[16.547] GFxAction_OpenMovie PersistentLevel.Main_Sequence.GFxAction_OpenMovie_104
+[21.516] SeqAct_Gate PersistentLevel.Main_Sequence.SeqAct_Gate_237
+[26.516] SeqAct_Gate PersistentLevel.Main_Sequence.SeqAct_Gate_237
+[29.719] SeqEvent_Console Prefabs.Gui_Terminal01_Prefab_Seq.SeqEvent_Console_262
+[29.719] SeqEvent_Console PersistentLevel.Main_Sequence.SeqEvent_Console_264
+[29.719] SeqAct_SetFloat PersistentLevel.Main_Sequence.SeqAct_SetFloat_247
+[29.719] SeqAct_Interp PersistentLevel.Main_Sequence.SeqAct_Interp_241
+[29.719] SeqAct_Interp Prefabs.Gui_Terminal01_Prefab_Seq.SeqAct_Interp_238
+[29.734] SeqAct_WwisePostEvent PersistentLevel.Main_Sequence.SeqAct_WwisePostEvent_259
+[30.203] SeqAct_Gate Prefabs.Gui_Terminal01_Prefab_Seq.SeqAct_Gate_236
+[30.203] SeqAct_WwisePostEvent Prefabs.Gui_Terminal01_Prefab_Seq.SeqAct_WwisePostEvent_251
+[30.203] SeqAct_Gate Prefabs.Gui_Terminal01_Prefab_Seq.SeqAct_Gate_236
+[30.750] SeqAct_Gate Prefabs.Gui_Terminal01_Prefab_Seq.SeqAct_Gate_236
+[30.766] SeqAct_Gate Prefabs.Gui_Terminal01_Prefab_Seq.SeqAct_Gate_236
+[31.516] SeqAct_Gate PersistentLevel.Main_Sequence.SeqAct_Gate_237

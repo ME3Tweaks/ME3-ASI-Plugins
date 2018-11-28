@@ -210,3 +210,6 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+/RemoteDLLInjector32.exe
+/debug.cmd
+/debug-inject.ps1

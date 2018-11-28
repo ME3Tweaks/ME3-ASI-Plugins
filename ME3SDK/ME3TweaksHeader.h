@@ -6,28 +6,141 @@
 #include <iostream>
 #include <ostream>
 #include <streambuf>
+#include <cstdarg>
+#include <vector>
 #include "SdkHeaders.h"
+using namespace std;
 
 typedef void(__thiscall *tProcessEvent)(class UObject *, class UFunction *, void *, void *);
 tProcessEvent ProcessEvent = (tProcessEvent)0x00453120;
 
+const std::string string_format(const char * const zcFormat, ...) {
 
-class teebuf
-	: public std::streambuf {
-	std::streambuf* d_sbuf1;
-	std::streambuf* d_sbuf2;
+	// initialize use of the variable argument array
+	va_list vaArgs;
+	va_start(vaArgs, zcFormat);
+
+	// reliably acquire the size
+	// from a copy of the variable argument array
+	// and a functionally reliable call to mock the formatting
+	va_list vaArgsCopy;
+	va_copy(vaArgsCopy, vaArgs);
+	const int iLen = std::vsnprintf(NULL, 0, zcFormat, vaArgsCopy);
+	va_end(vaArgsCopy);
+
+	// return a formatted string without risking memory mismanagement
+	// and without assuming any compiler or platform specific behavior
+	std::vector<char> zc(iLen + 1);
+	std::vsnprintf(zc.data(), zc.size(), zcFormat, vaArgs);
+	va_end(vaArgs);
+	return std::string(zc.data(), iLen);
+}
+
+class ME3TweaksASILogger
+{
 public:
-	teebuf(std::streambuf* sbuf1, std::streambuf* sbuf2)
-		: d_sbuf1(sbuf1), d_sbuf2(sbuf2) {
+	char* logfname;
+
+	ME3TweaksASILogger(char* loggername, char* _logfname) {
+		logfname = _logfname;
+		fopen_s(&log, logfname, "w");
+
+		AllocConsole();
+		AttachConsole(GetCurrentProcessId());
+
+		// Get STDOUT handle
+		HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+		int SystemOutput = _open_osfhandle(intptr_t(ConsoleOutput), _O_TEXT);
+		FILE *COutputHandle = _fdopen(SystemOutput, "w");
+
+		// Get STDERR handle
+		HANDLE ConsoleError = GetStdHandle(STD_ERROR_HANDLE);
+		int SystemError = _open_osfhandle(intptr_t(ConsoleError), _O_TEXT);
+		FILE *CErrorHandle = _fdopen(SystemError, "w");
+
+		// Redirect the CRT standard input, output, and error handles to the console
+		freopen_s(&COutputHandle, "CONOUT$", "w", stdout);
+		freopen_s(&CErrorHandle, "CONOUT$", "w", stderr);
+
+		boottime = GetTickCount64();
+		writeToLog("ME3Tweaks ASI Logger - By Mgamerz\n"s, false);
+		writeToLog(string(loggername) + "\n", false);
+		writeToLog(string_format("Logging to %s%s\n", workingdir().c_str(), _logfname), true);
+		writeToLog("--------------------------------------------------------\n", false);
 	}
-	int overflow(int c) {
-		if (c != std::char_traits<char>::eof()) {
-			this->d_sbuf1->sputc(c);
-			this->d_sbuf2->sputc(c);
+
+	void writeToDiskOnly(string str, bool bTimeStamp) {
+		if (bTimeStamp) {
+			string timeStamp = getTimestampStr();
+			fprintf(log, timeStamp.c_str());
+			//free((char*)timeStamp);
 		}
-		return std::char_traits<char>::not_eof(c);
+
+		fprintf(log, "%s", str.c_str());
+
+		if (numLinesWritten > 10) {
+			fflush(log);
+			numLinesWritten = 0;
+		}
+	}
+
+	void writeToConsoleOnly(string str, bool bTimeStamp) {
+		if (bTimeStamp) {
+			string timeStamp = getTimestampStr();
+			std::cout << timeStamp;
+			//free((char*)timeStamp);
+		}
+
+		std::cout << str;
+	}
+
+	void writeToLog(string str, bool bTimeStamp) {
+		if (bTimeStamp) {
+			string timeStamp = getTimestampStr();
+			std::cout << timeStamp;
+			fprintf(log, timeStamp.c_str());
+			//free((char*)timeStamp);
+		}
+		/*if (!log) {
+			std::cout << "LOG ISNT INITALIZED";
+		}*/
+		fprintf(log, "%s", str.c_str());
+		std::cout << str;
+
+		if (numLinesWritten > 10) {
+			fflush(log);
+			numLinesWritten = 0;
+		}
+	}
+
+	void flush() {
+		if (log) {
+			fflush(log);
+			numLinesWritten = 0;
+		}
+	}
+
+private:
+	int numLinesWritten = 0;
+	FILE* log;
+	ULONGLONG boottime = 0;
+
+	std::string workingdir()
+	{
+		char buf[256];
+		GetCurrentDirectoryA(256, buf);
+		return std::string(buf) + '\\';
+	}
+
+	string getTimestampStr() {
+		ULONGLONG currenttime = GetTickCount64();
+		ULONGLONG secondsSinceBoot = (currenttime - boottime) / 1000;
+		int ms = (currenttime - boottime) % 1000;
+		return string_format("[%llu.%d] ", secondsSinceBoot, ms);
 	}
 };
+
+
 
 bool isPartOf(char* w1, char* w2)
 {
