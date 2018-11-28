@@ -1,64 +1,18 @@
 #include <stdio.h>
 #include <io.h>
 #include <fcntl.h>     /* for _O_TEXT and _O_BINARY */  
-#include "..\ME3SDK\SdkHeaders.h"
-#include "..\VMTDetour\vmthooks.h"
-#include "detours.h"
 #include <string>
+#include <fstream>
+#include <iostream>
+#include <ostream>
+#include <streambuf>
+#include "..\ME3SDK\ME3TweaksHeader.h"
+#include "..\ME3SDK\SdkHeaders.h"
+#include "..\detours\detours.h"
+
+
 #define _CRT_SECURE_NO_WARNINGS
 #pragma comment(lib, "detours.lib") //Library needed for Hooking part.
-
-typedef void(__thiscall *tProcessEvent)(class UObject *, class UFunction *, void *, void *);
-tProcessEvent ProcessEvent = (tProcessEvent)0x00453120;
-
-bool isPartOf(char* w1, char* w2)
-{
-	int i = 0;
-	int j = 0;
-
-
-	while (w1[i] != '\0') {
-		if (w1[i] == w2[j])
-		{
-			int init = i;
-			while (w1[i] == w2[j] && w2[j] != '\0')
-			{
-				j++;
-				i++;
-			}
-			if (w2[j] == '\0') {
-				return true;
-			}
-			j = 0;
-		}
-		i++;
-	}
-	return false;
-}
-
-std::string wchar2string(wchar_t* str)
-{
-	std::string mystring;
-	while (*str)
-		mystring += (char)*str++;
-	return  mystring;
-}
-
-char GetBit(int value, int bit) {
-	return (value >> bit) & 1;
-}
-
-std::string GuidToString(FGuid guid)
-{
-	char guid_cstr[39];
-	snprintf(guid_cstr, sizeof(guid_cstr),
-		"{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
-		guid.A, guid.B, guid.C,
-		GetBit(guid.D, 0), GetBit(guid.D, 1), GetBit(guid.D, 2), GetBit(guid.D, 3),
-		GetBit(guid.D, 4), GetBit(guid.D, 5), GetBit(guid.D, 6), GetBit(guid.D, 7));
-
-	return std::string(guid_cstr);
-}
 
 ULONGLONG boottime = 0;
 int loopCheck = 1;
@@ -152,14 +106,19 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 		printf("New GRIMP status: %c\n", grimp->GameStatus);
 	}
 	else*/ if (isPartOf(szName, "Function Engine.SequenceOp.Activated")) {
-		//printf(szName);
+	//printf(szName);
 		USequenceOp* op = (USequenceOp*)pObject;
 		ULONGLONG currenttime = GetTickCount64();
 		unsigned long secondsSinceBoot = (currenttime - boottime) / 1000;
 		int ms = (currenttime - boottime) % 1000;
-		printf("[%lu.%d] ", secondsSinceBoot, ms);
-		printf(op->GetFullName());
-		printf("_%d",op->NetIndex);
+		std::cout << "[";
+		std::cout << secondsSinceBoot;
+		std::cout << ".";
+		std::cout << ms;
+		std::cout << "] ";
+		std::cout << op->GetFullName();
+		std::cout << "_";
+		std::cout << op->NetIndex;
 		//op->
 		//printf("Count: %d\n", op->m_aObjComment.Count);
 		//printf("Max: %d\n", op->m_aObjComment.Max);
@@ -168,7 +127,7 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 		//for (unsigned int a = 0; a < op->m_aObjComment.Count; a++) {
 		//	wprintf(op->m_aObjComment(0).Data);
 		//}
-		printf("\n");
+		std::cout << "\n";
 
 		ProcessEvent(pObject, pFunction, pParms, pResult);
 	}
@@ -209,7 +168,7 @@ void onAttach()
 	boottime = GetTickCount64();
 	AllocConsole();
 	AttachConsole(GetCurrentProcessId());
-	
+
 	// Get STDOUT handle
 	HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	int SystemOutput = _open_osfhandle(intptr_t(ConsoleOutput), _O_TEXT);
@@ -224,9 +183,12 @@ void onAttach()
 	freopen_s(&COutputHandle, "CONOUT$", "w", stdout);
 	freopen_s(&CErrorHandle, "CONOUT$", "w", stderr);
 
+	std::ofstream outf("KismetLog.txt");
+	teebuf tb{ outf.rdbuf(), std::cout.rdbuf() };
+	std::streambuf* coutbuf = std::cout.rdbuf(&tb);
 
-	printf("ME3Tweaks Kismet Logger for Mass Effect 3\n");
-	printf("By Mgamerz\n");
+	std::cout << "ME3Tweaks Kismet Logger for Mass Effect 3\nBy Mgamerz\n";
+	std::cout.rdbuf(coutbuf); // needs to be replaced as it gets used to flush
 
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread()); //This command set the current working thread to the game current thread.
@@ -234,20 +196,6 @@ void onAttach()
 	DetourTransactionCommit();
 }
 
-BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
-{
-	switch (dwReason)
-	{
-	case DLL_PROCESS_ATTACH:
-		DisableThreadLibraryCalls(hModule);
-		CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)onAttach, NULL, 0, NULL);
-		return true;
-		break;
 
-	case DLL_PROCESS_DETACH:
-		return true;
-		break;
-	}
-	return true;
 };
 
