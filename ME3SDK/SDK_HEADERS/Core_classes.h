@@ -214,6 +214,7 @@ public:
 	char* GetName(); 
 	char* GetNameCPP(); 
 	char* GetFullName(); 
+	char* GetFullName2();
 
 	template< class T > static T* FindObject ( char* ObjectFullName ); 
 	static UClass* FindClass ( char* ClassFullName ); 

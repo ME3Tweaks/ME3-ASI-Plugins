@@ -20,53 +20,47 @@ ME3TweaksASILogger logger("Galaxy At Work Logger", "GAWLog.txt");
 void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void *pParms, void *pResult)
 {
 	char *szName = pFunction->GetFullName();
-	//if (isPartOf(szName, "Function SFXGame.SFXOnlineComponentUI.UpdateGalaxyAtWarLevel")) {
+	if (isPartOf(szName, "Function SFXOnlineFoundation.SFXOnlineComponentBlazeGame.OnMPGameStatusChange")) {
+		logger.writeToLog(string_format("%s\n", szName), true);
+		USFXOnlineComponentBlazeGame_execOnMPGameStatusChange_Parms* parms = (USFXOnlineComponentBlazeGame_execOnMPGameStatusChange_Parms*)pParms;
+		if (parms->Event) {
+			FString statusAsStr = parms->Event->GetEventStatusAsString(parms->Event->CurrentStatus);
+			if (statusAsStr.Data) {
+				logger.writeToLog(string_format("New status: %s\n", wchar2string(statusAsStr.Data).c_str()), true);
+			}
+		}
+	}
+	else
+		if (/*(isPartOf(szName, "Blaze") || isPartOf(szName, "Job")) &&*/ !isPartOf(szName, "Tick")) {
+			logger.writeToLog(string_format("%s\n", szName), true);
+		}
+		//else if (isPartOf(szName, "Function SFXGame.SFXGAWAssetsHandler.OnGetRatingsComplete")) {
+			//logger.writeToLog(string_format("%s\n", szName), true);
+			//USFXOnlineComponentBlazeNotification_execGetGalaxyAtWarRatingsCompleted_Parms* parms = (USFXOnlineComponentBlazeNotification_execGetGalaxyAtWarRatingsCompleted_Parms*)pParms;
+			//logger.writeToLog(string_format("  Error: %d\n", parms->errorCode), true);
+			//logger.writeToLog(string_format("  Level: %d\n", parms->Level), true);
+			//parms->Level = 26;
+			//logger.writeToLog(string_format("  >> Level: %d\n", parms->Level), true);
+
+			//logger.writeToLog(string_format("  uSecRatings: %d\n", parms->updatedSecurityRatings.Count), true);
+			//for (int i = 0; i < parms->updatedSecurityRatings.Count; i++) {
+			//	parms->updatedSecurityRatings(i) = i;
+			//	logger.writeToLog(string_format("   uSecRatings[%d]: %d\n", i, parms->updatedSecurityRatings(i)), true);
+			//}
+			//logger.writeToLog(string_format("  uWarAssets: %d\n", parms->updatedWarAssets.Count), true);
+			//for (int i = 0; i < parms->updatedWarAssets.Count; i++) {
+			//	parms->updatedWarAssets(i) = i;
+			//	logger.writeToLog(string_format("   uWarAssets[%d]: %d\n", i, parms->updatedWarAssets(i)), true);
+			//}
+
+			//for (int i = 0; i < parms->updatedSecurityRatings.Count; i++) {
+			//	parms->updatedSecurityRatings(i) = i;
+			//	logger.writeToLog(string_format("  >> uWarAssets[%d]: %d\n", i, parms->updatedSecurityRatings(i)), true);
+			//}
+		//}
+	//else if (isPartOf(szName, "GAW") || isPartOf(szName, "GaW") || isPartOf(szName, "GalaxyAtWar")) {
 	//	logger.writeToLog(string_format("%s\n", szName), true);
-	//	USFXOnlineComponentUI_eventUpdateGalaxyAtWarLevel_Parms* parms = (USFXOnlineComponentUI_eventUpdateGalaxyAtWarLevel_Parms*)pParms;
-	//	logger.writeToLog(string_format("  NewLevel: %d\n", parms->newLevel), true);
-	//	parms->newLevel = 1.0f;
-	//	logger.writeToLog(string_format("  >> NewLevel: %d\n", parms->newLevel), true);
-
-	//} else
-	if (isPartOf(szName, "Function SFXGame.SFXOnlineComponentUI.UpdateGalaxyAtWarLevel")) {
-		logger.writeToLog(string_format("%s\n", szName), true);
-		USFXOnlineComponentUI_eventUpdateGalaxyAtWarLevel_Parms* parms = (USFXOnlineComponentUI_eventUpdateGalaxyAtWarLevel_Parms*)pParms;
-		logger.writeToLog(string_format("  NewLevel: %d\n", parms->newLevel), true);
-		parms->newLevel = 1.0f;
-		logger.writeToLog(string_format("  >> NewLevel: %d\n", parms->newLevel), true);
-
-	}
-	else if (isPartOf(szName, "Function SFXGame.SFXGAWAssetsHandler.OnGetRatingsComplete")) {
-		//if (isPartOf(szName, "GAW") || isPartOf(szName, "GalaxyAtWar")) {
-			//USequenceOp* op = (USequenceOp*)pObject;
-			//char* fullname = op->GetFullName();
-			//int netindex = op->NetIndex;
-		logger.writeToLog(string_format("%s\n", szName), true);
-		USFXOnlineComponentBlazeNotification_execGetGalaxyAtWarRatingsCompleted_Parms* parms = (USFXOnlineComponentBlazeNotification_execGetGalaxyAtWarRatingsCompleted_Parms*)pParms;
-		logger.writeToLog(string_format("  Error: %d\n", parms->errorCode), true);
-		logger.writeToLog(string_format("  Level: %d\n", parms->Level), true);
-		parms->Level = 26;
-		logger.writeToLog(string_format("  >> Level: %d\n", parms->Level), true);
-
-		logger.writeToLog(string_format("  uSecRatings: %d\n", parms->updatedSecurityRatings.Count), true);
-		for (int i = 0; i < parms->updatedSecurityRatings.Count; i++) {
-			parms->updatedSecurityRatings(i) = i;
-			logger.writeToLog(string_format("   uSecRatings[%d]: %d\n", i, parms->updatedSecurityRatings(i)), true);
-		}
-		logger.writeToLog(string_format("  uWarAssets: %d\n", parms->updatedWarAssets.Count), true);
-		for (int i = 0; i < parms->updatedWarAssets.Count; i++) {
-			parms->updatedWarAssets(i) = i;
-			logger.writeToLog(string_format("   uWarAssets[%d]: %d\n", i, parms->updatedWarAssets(i)), true);
-		}
-
-		for (int i = 0; i < parms->updatedSecurityRatings.Count; i++) {
-			parms->updatedSecurityRatings(i) = i;
-			logger.writeToLog(string_format("  >> uWarAssets[%d]: %d\n", i, parms->updatedSecurityRatings(i)), true);
-		}
-	}
-	else if (isPartOf(szName, "GAW") || isPartOf(szName, "GaW") || isPartOf(szName, "GalaxyAtWar")) {
-		logger.writeToLog(string_format("%s\n", szName), true);
-	}
+	//}
 	ProcessEvent(pObject, pFunction, pParms, pResult);
 }
 

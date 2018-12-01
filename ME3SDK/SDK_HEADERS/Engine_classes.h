@@ -31699,6 +31699,7 @@ public:
 	void GetObjectVars ( struct FString inDesc, TArray< class UObject* >* objVars );
 	void GetLinkedObjects ( class UClass* ObjectType, unsigned long bRecurse, TArray< class USequenceObject* >* out_Objects );
 	bool HasLinkedOps ( unsigned long bConsiderInputLinks );
+	char* GetContainingMapName ( );
 };
 
 UClass* USequenceOp::pClassPointer = NULL;

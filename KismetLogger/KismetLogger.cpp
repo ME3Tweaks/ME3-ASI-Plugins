@@ -23,29 +23,15 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 	if (isPartOf(szName, "Function Engine.SequenceOp.Activated")) {
 		USequenceOp* op = (USequenceOp*)pObject;
 		char* fullname = op->GetFullName();
+		char* mapname = op->GetContainingMapName();
 		int netindex = op->NetIndex;
-		logger.writeToLog(string_format("%s_%d\n", fullname, netindex), true);
-		//logger->writeToLog("Test"s, true);
-		//logger.writeToLog("Test."s, true);
-		//std::cout.rdbuf(sharedtb); // needs to be replaced as it gets used to flush
-		//std::cout << "[";
-		//std::cout << secondsSinceBoot;
-		//std::cout << ".";
-		//std::cout << ms;
-		//std::cout << "] ";
-		//std::cout << op->GetFullName();
-		//std::cout << "_";
-		//std::cout << op->NetIndex;
-		//std::cout << "\n";
-		////printf("%p\n", coutbuf);
-		//std::cout.rdbuf(coutbuf); // set to std cout to flush
+		logger.writeToLog(string_format("(%s) %s_%d\n", mapname, fullname, netindex), true);
 	}
 	ProcessEvent(pObject, pFunction, pParms, pResult);
 }
 
 void onAttach()
 {
-	//logger = ME3TweaksASILogger("Kismet Logger", "KismetLog.txt");
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread()); //This command set the current working thread to the game current thread.
 	DetourAttach(&(PVOID&)ProcessEvent, HookedPE); //This command will start your Hook.

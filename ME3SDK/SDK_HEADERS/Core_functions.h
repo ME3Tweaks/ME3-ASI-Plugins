@@ -100,6 +100,33 @@ char* UObject::GetFullName()
 	return "(null)"; 
 } 
 
+//Used to get debug info about outer
+char* UObject::GetFullName2()
+{
+	if (this->Class && this->Outer)
+	{
+		static char cOutBuffer[512];
+		class UObject* OuterObj = this->Outer;
+
+		strcpy_s(cOutBuffer, this->Class->GetName());
+		strcat_s(cOutBuffer, " ");
+		strcat_s(cOutBuffer, this->Outer->GetName());
+
+		while (OuterObj->Class && OuterObj->Outer)
+		{
+			strcat_s(cOutBuffer, ".");
+			strcat_s(cOutBuffer, OuterObj->Outer->GetName());
+			strcat_s(cOutBuffer, ".");
+			OuterObj = OuterObj->Outer;
+		}
+
+
+		return cOutBuffer;
+	}
+
+	return "(null)";
+}
+
 template< class T > T* UObject::FindObject ( char* ObjectFullName ) 
 { 
 	while ( ! UObject::GObjObjects() ) 
