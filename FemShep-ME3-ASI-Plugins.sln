@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FunctionLogger", "FunctionL
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RetaliationBugfix", "RetaliationBugfix\RetaliationBugfix.vcxproj", "{347D9B59-772C-4D03-9311-453BCE8D4EA5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FullGAW", "FullGAW\FullGAW.vcxproj", "{AFBEB078-9006-4D42-A734-CEA565331945}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -49,6 +51,12 @@ Global
 		{347D9B59-772C-4D03-9311-453BCE8D4EA5}.Release|x64.ActiveCfg = Release|Win32
 		{347D9B59-772C-4D03-9311-453BCE8D4EA5}.Release|x86.ActiveCfg = Release|Win32
 		{347D9B59-772C-4D03-9311-453BCE8D4EA5}.Release|x86.Build.0 = Release|Win32
+		{AFBEB078-9006-4D42-A734-CEA565331945}.Debug|x64.ActiveCfg = Debug|Win32
+		{AFBEB078-9006-4D42-A734-CEA565331945}.Debug|x86.ActiveCfg = Debug|Win32
+		{AFBEB078-9006-4D42-A734-CEA565331945}.Debug|x86.Build.0 = Debug|Win32
+		{AFBEB078-9006-4D42-A734-CEA565331945}.Release|x64.ActiveCfg = Release|Win32
+		{AFBEB078-9006-4D42-A734-CEA565331945}.Release|x86.ActiveCfg = Release|Win32
+		{AFBEB078-9006-4D42-A734-CEA565331945}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
