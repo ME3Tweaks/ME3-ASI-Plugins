@@ -214,3 +214,4 @@ ModelManifest.xml
 /debug.cmd
 /debug-inject.ps1
 /GAWLog.txt
+/install.cmd
