@@ -82,12 +82,17 @@ struct FNameEntry
 struct FName 
 { 
 	FNameEntry*		NameEntry; 
-	unsigned char	unknownData00[ 0x4 ]; 
+	UINT32	NameIndex; 
 
 	char* GetName() 
 	{ 
 		return this->NameEntry->Name; 
 	}; 
+
+	UINT32 GetIndex()
+	{
+		return this->NameIndex;
+	};
 
 	bool operator == ( const FName& A ) const 
 	{ 
