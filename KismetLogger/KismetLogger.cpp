@@ -24,8 +24,8 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 		USequenceOp* op = (USequenceOp*)pObject;
 		char* fullname = op->GetFullName();
 		char* mapname = op->GetContainingMapName();
-		int netindex = op->Name.GetIndex();
-		logger.writeToLog(string_format("(%s) %s_%d\n", mapname, fullname, netindex), true);
+		int instanceIndex = op->Name.GetIndex();
+		logger.writeToLog(string_format("(%s) %s_%d\n", mapname, fullname, instanceIndex), true);
 	}
 	ProcessEvent(pObject, pFunction, pParms, pResult);
 }
