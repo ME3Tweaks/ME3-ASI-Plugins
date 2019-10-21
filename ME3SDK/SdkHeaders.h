@@ -97,7 +97,12 @@ struct FName
 	bool operator == ( const FName& A ) const 
 	{ 
 		return ( NameEntry == A.NameEntry ); 
-	}; 
+	};
+
+	bool operator == (const char* str) const
+	{
+		return strcmp(NameEntry->Name, str) == 0;
+	};
 }; 
 
 struct FString : public TArray< wchar_t > 
@@ -125,7 +130,12 @@ struct FString : public TArray< wchar_t >
 		} 
 
 		return *this; 
-	}; 
+	};
+
+	bool operator == (const wchar_t* str) const
+	{
+		return wcscmp(Data, str) == 0;
+	};
 }; 
 
 struct FScriptDelegate 
