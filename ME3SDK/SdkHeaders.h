@@ -44,7 +44,7 @@ public:
 	}; 
 
 public: 
-	int Num() 
+	int Num() const
 	{ 
 		return this->Count; 
 	}; 

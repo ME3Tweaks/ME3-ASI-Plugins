@@ -8,6 +8,8 @@
 #include <streambuf>
 #include <cstdarg>
 #include <vector>
+#include <locale> 
+#include <codecvt>
 #include "SdkHeaders.h"
 using namespace std;
 
@@ -36,37 +38,52 @@ const std::string string_format(const char * const zcFormat, ...) {
 	return std::string(zc.data(), iLen);
 }
 
+inline std::string ws2s(const std::wstring& wstr)
+{
+	using convert_typeX = std::codecvt_utf8<wchar_t>;
+	std::wstring_convert<convert_typeX, wchar_t> converterX;
+
+	return converterX.to_bytes(wstr);
+}
+
 class ME3TweaksASILogger
 {
 public:
 	char* logfname;
 
-	ME3TweaksASILogger(char* loggername, char* _logfname) {
+	ME3TweaksASILogger(char* loggername, char* _logfname, bool console = true) {
 		logfname = _logfname;
 		fopen_s(&log, logfname, "w");
 
-		AllocConsole();
-		AttachConsole(GetCurrentProcessId());
+		if (console)
+		{
+			AllocConsole();
+			AttachConsole(GetCurrentProcessId());
 
-		// Get STDOUT handle
-		HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-		int SystemOutput = _open_osfhandle(intptr_t(ConsoleOutput), _O_TEXT);
-		FILE *COutputHandle = _fdopen(SystemOutput, "w");
+			// Get STDOUT handle
+			HANDLE ConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+			int SystemOutput = _open_osfhandle(intptr_t(ConsoleOutput), _O_TEXT);
+			FILE* COutputHandle = _fdopen(SystemOutput, "w");
 
-		// Get STDERR handle
-		HANDLE ConsoleError = GetStdHandle(STD_ERROR_HANDLE);
-		int SystemError = _open_osfhandle(intptr_t(ConsoleError), _O_TEXT);
-		FILE *CErrorHandle = _fdopen(SystemError, "w");
+			// Get STDERR handle
+			HANDLE ConsoleError = GetStdHandle(STD_ERROR_HANDLE);
+			int SystemError = _open_osfhandle(intptr_t(ConsoleError), _O_TEXT);
+			FILE* CErrorHandle = _fdopen(SystemError, "w");
 
-		// Redirect the CRT standard input, output, and error handles to the console
-		freopen_s(&COutputHandle, "CONOUT$", "w", stdout);
-		freopen_s(&CErrorHandle, "CONOUT$", "w", stderr);
+			// Redirect the CRT standard input, output, and error handles to the console
+			freopen_s(&COutputHandle, "CONOUT$", "w", stdout);
+			freopen_s(&CErrorHandle, "CONOUT$", "w", stderr);
+		}
 
 		boottime = GetTickCount64();
 		writeToLog("ME3Tweaks ASI Logger - By Mgamerz\n"s, false);
 		writeToLog(string(loggername) + "\n", false);
 		writeToLog(string_format("Logging to %s%s\n", workingdir().c_str(), _logfname), true);
 		writeToLog("--------------------------------------------------------\n", false);
+	}
+
+	void writeToDiskOnly(const wstring str, const bool bTimeStamp) {
+		writeToDiskOnly(ws2s(str), bTimeStamp);
 	}
 
 	void writeToDiskOnly(string str, bool bTimeStamp) {
@@ -84,6 +101,10 @@ public:
 		}
 	}
 
+	void writeToConsoleOnly(const wstring str, const bool bTimeStamp) {
+		writeToConsoleOnly(ws2s(str), bTimeStamp);
+	}
+
 	void writeToConsoleOnly(string str, bool bTimeStamp) {
 		if (bTimeStamp) {
 			string timeStamp = getTimestampStr();
@@ -92,6 +113,10 @@ public:
 		}
 
 		std::cout << str;
+	}
+
+	void writeToLog(const wstring str, const bool bTimeStamp) {
+		writeToLog(ws2s(str), bTimeStamp);
 	}
 
 	void writeToLog(string str, bool bTimeStamp) {
@@ -189,4 +214,9 @@ std::string GuidToString(FGuid guid)
 		GetBit(guid.D, 4), GetBit(guid.D, 5), GetBit(guid.D, 6), GetBit(guid.D, 7));
 
 	return std::string(guid_cstr);
+}
+
+template<typename T>
+bool IsA(UObject* object) {
+	return object->Class == T::StaticClass();
 }

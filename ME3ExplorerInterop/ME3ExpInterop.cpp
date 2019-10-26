@@ -8,9 +8,8 @@
 #include <streambuf>
 #include <shlwapi.h>
 
-#include "..\ME3SDK\ME3TweaksHeader.h"
-#include "..\ME3SDK\SdkHeaders.h"
-#include "..\detours\detours.h"
+#include "../ME3SDK/ME3TweaksHeader.h"
+#include "../detours/detours.h"
 #include "ME3ExpInterop.h"
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -25,14 +24,10 @@ char* GetUObjectClassName(UObject* object)
 	return cOutBuffer;
 }
 
-bool IsA(UObject* object, const char* className) {
-	return strcmp(GetUObjectClassName(object), className) == 0;
-}
-
 wchar_t msgBuffer[512];
 wchar_t* msgPtr;
 int writePos = 0;
-void WriteToMsgBuffer(const wchar_t* wstr, int len, bool msgStart = false) {
+void WriteToMsgBuffer(const wchar_t* wstr, const int len, const bool msgStart = false) {
 	if (msgStart)
 	{
 		if (writePos > 400)
@@ -52,11 +47,11 @@ void WriteToMsgBuffer(const wchar_t* wstr, int len, bool msgStart = false) {
 	}
 }
 
-void WriteToMsgBuffer(FString& fstr, bool msgStart = false) {
+void WriteToMsgBuffer(const FString& fstr, const bool msgStart = false) {
 	WriteToMsgBuffer(fstr.Data, fstr.Num(), msgStart);
 }
 
-void WriteToMsgBuffer(wstring& wstr, bool msgStart = false) {
+void WriteToMsgBuffer(wstring& wstr, const bool msgStart = false) {
 	WriteToMsgBuffer(wstr.c_str(), wstr.length(), msgStart);
 }
 
@@ -68,77 +63,77 @@ struct ME3ExpMsg
 
 void SendMessageToMe3Explorer(USequenceOp* op)
 {
-	const int numVarLinks = op->VariableLinks.Num();
+	const auto numVarLinks = op->VariableLinks.Num();
 	for (size_t i = 0; i < numVarLinks; i++)
 	{
 		if (op->VariableLinks(i).LinkedVariables.Num() == 0)
 		{
 			continue;
 		}
-		if (op->VariableLinks(i).LinkDesc == L"MessageName" && IsA(op->VariableLinks(i).LinkedVariables(0), "SeqVar_String"))
+		const auto seqVar = op->VariableLinks(i).LinkedVariables(0);
+		if (op->VariableLinks(i).LinkDesc == L"MessageName" && IsA<USeqVar_String>(seqVar))
 		{
-			USeqVar_String* strVar = (USeqVar_String*)op->VariableLinks(i).LinkedVariables(0);
+			const USeqVar_String* strVar = static_cast<USeqVar_String*>(seqVar);
 			WriteToMsgBuffer(strVar->StrValue, true);
 		}
-		else if (op->VariableLinks(i).LinkDesc == L"String" && IsA(op->VariableLinks(i).LinkedVariables(0), "SeqVar_String"))
+		else if (op->VariableLinks(i).LinkDesc == L"String" && IsA<USeqVar_String>(seqVar))
 		{
-			USeqVar_String* strVar = (USeqVar_String*)op->VariableLinks(i).LinkedVariables(0);
+			const USeqVar_String* strVar = static_cast<USeqVar_String*>(seqVar);
 			WriteToMsgBuffer(L"string", 7);
 			WriteToMsgBuffer(strVar->StrValue);
 		}
-		else if (op->VariableLinks(i).LinkDesc == L"Vector" && IsA(op->VariableLinks(i).LinkedVariables(0), "SeqVar_Vector"))
+		else if (op->VariableLinks(i).LinkDesc == L"Vector" && IsA<USeqVar_Vector>(seqVar))
 		{
-			USeqVar_Vector* vectorVar = (USeqVar_Vector*)op->VariableLinks(i).LinkedVariables(0);
+			const USeqVar_Vector* vectorVar = static_cast<USeqVar_Vector*>(seqVar);
 			WriteToMsgBuffer(L"vector", 7);
 			WriteToMsgBuffer(to_wstring(vectorVar->VectValue.X));
 			WriteToMsgBuffer(to_wstring(vectorVar->VectValue.Y));
 			WriteToMsgBuffer(to_wstring(vectorVar->VectValue.Z));
 		}
-		else if (op->VariableLinks(i).LinkDesc == L"Float" && IsA(op->VariableLinks(i).LinkedVariables(0), "SeqVar_Float"))
+		else if (op->VariableLinks(i).LinkDesc == L"Float" && IsA<USeqVar_Float>(seqVar))
 		{
-			USeqVar_Float* floatVar = (USeqVar_Float*)op->VariableLinks(i).LinkedVariables(0);
+			const USeqVar_Float* floatVar = static_cast<USeqVar_Float*>(seqVar);
 			WriteToMsgBuffer(L"float", 6);
 			WriteToMsgBuffer(to_wstring(floatVar->FloatValue));
 		}
-		else if (op->VariableLinks(i).LinkDesc == L"Int" && IsA(op->VariableLinks(i).LinkedVariables(0), "SeqVar_Int"))
+		else if (op->VariableLinks(i).LinkDesc == L"Int" && IsA<USeqVar_Int>(seqVar))
 		{
-			USeqVar_Int* intVar = (USeqVar_Int*)op->VariableLinks(i).LinkedVariables(0);
+			const USeqVar_Int* intVar = static_cast<USeqVar_Int*>(seqVar);
 			WriteToMsgBuffer(L"int", 4);
 			WriteToMsgBuffer(to_wstring(intVar->IntValue));
 		}
-		else if (op->VariableLinks(i).LinkDesc == L"Bool" && IsA(op->VariableLinks(i).LinkedVariables(0), "SeqVar_Bool"))
+		else if (op->VariableLinks(i).LinkDesc == L"Bool" && IsA<USeqVar_Bool>(seqVar))
 		{
-			USeqVar_Bool* boolVar = (USeqVar_Bool*)op->VariableLinks(i).LinkedVariables(0);
+			const USeqVar_Bool* boolVar = static_cast<USeqVar_Bool*>(seqVar);
 			WriteToMsgBuffer(L"bool", 5);
 			WriteToMsgBuffer(to_wstring(boolVar->bValue));
 		}
 	}
 	msgBuffer[writePos] = 0;
 	writePos++;
-	HWND handle = FindWindow(NULL, L"ME3Explorer");
+	const auto handle = FindWindow(nullptr, L"ME3Explorer");
 	if (handle)
 	{
 		constexpr unsigned long SENT_FROM_ME3 = 0x02AC00C2;
 		ME3ExpMsg msg;
-		int len = writePos - (msgPtr - msgBuffer);
+		const auto len = writePos - (msgPtr - msgBuffer);
 		wcsncpy_s(msg.msg, msgPtr, len);
 		COPYDATASTRUCT cds;
 		ZeroMemory(&cds, sizeof(COPYDATASTRUCT));
 		cds.dwData = SENT_FROM_ME3;
 		cds.cbData = sizeof(msg);
 		cds.lpData = &msg;
-		SendMessageTimeout(handle, WM_COPYDATA, NULL, (LPARAM)&cds, 0, 10, nullptr);
+		SendMessageTimeout(handle, WM_COPYDATA, NULL, reinterpret_cast<LPARAM>(&cds), 0, 10, nullptr);
 	}
 }
 
 void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void *pParms, void *pResult)
 {
-	char* className = GetUObjectClassName(pObject);
-	if (strcmp(className, "SeqAct_SendMessageToME3Explorer") == 0)
+	if (strcmp(pObject->Class->GetName(), "SeqAct_SendMessageToME3Explorer") == 0)
 	{
-		char* funcName = pFunction->GetFullName();
+		const auto funcName = pFunction->GetFullName();
 		if (isPartOf(funcName, "Function Engine.SequenceOp.Activated")) {
-			USequenceOp* op = (USequenceOp*)pObject;
+			const auto op = static_cast<USequenceOp*>(pObject);
 			SendMessageToMe3Explorer(op);
 		}
 	}

@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0626F548-B3AC-4BAC-8251-B655279EE851}"
 	ProjectSection(SolutionItems) = preProject
 		ME3SDK\ME3TweaksHeader.h = ME3SDK\ME3TweaksHeader.h
+		ME3SDK\ScreenLogger.h = ME3SDK\ScreenLogger.h
 		ME3SDK\SdkHeaders.h = ME3SDK\SdkHeaders.h
 	EndProjectSection
 EndProject
@@ -20,6 +21,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FullGAW", "FullGAW\FullGAW.vcxproj", "{AFBEB078-9006-4D42-A734-CEA565331945}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ME3ExplorerInterop", "ME3ExplorerInterop\ME3ExplorerInterop.vcxproj", "{4A106741-1AC7-4FF4-B6D9-802A7F3D23F1}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SeqActLogEnabler", "SeqActLogEnabler\SeqActLogEnabler.vcxproj", "{FCA74B26-594C-48AC-9206-00FAC7884944}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,6 +68,12 @@ Global
 		{4A106741-1AC7-4FF4-B6D9-802A7F3D23F1}.Release|x64.ActiveCfg = Release|Win32
 		{4A106741-1AC7-4FF4-B6D9-802A7F3D23F1}.Release|x86.ActiveCfg = Release|Win32
 		{4A106741-1AC7-4FF4-B6D9-802A7F3D23F1}.Release|x86.Build.0 = Release|Win32
+		{FCA74B26-594C-48AC-9206-00FAC7884944}.Debug|x64.ActiveCfg = Debug|Win32
+		{FCA74B26-594C-48AC-9206-00FAC7884944}.Debug|x86.ActiveCfg = Debug|Win32
+		{FCA74B26-594C-48AC-9206-00FAC7884944}.Debug|x86.Build.0 = Debug|Win32
+		{FCA74B26-594C-48AC-9206-00FAC7884944}.Release|x64.ActiveCfg = Release|Win32
+		{FCA74B26-594C-48AC-9206-00FAC7884944}.Release|x86.ActiveCfg = Release|Win32
+		{FCA74B26-594C-48AC-9206-00FAC7884944}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
