@@ -166,7 +166,7 @@ private:
 };
 
 
-
+/*Checks if w1 is part of w2*/
 bool isPartOf(char* w1, char* w2)
 {
 	int i = 0;

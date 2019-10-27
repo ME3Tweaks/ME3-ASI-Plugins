@@ -1,2 +1,2 @@
-copy /y Debug\FullGAW.dll "D:\Origin Games\Mass Effect 3\binaries\win32\asi\FullGAW.asi"
+copy /y Debug\AceSlammer.dll "D:\Origin Games\Mass Effect 3\binaries\win32\asi\AceSlammer.asi"
 "D:\Origin Games\Mass Effect 3\binaries\win32\MassEffect3.exe"
