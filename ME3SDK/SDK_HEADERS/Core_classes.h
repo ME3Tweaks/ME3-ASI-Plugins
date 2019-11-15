@@ -302,6 +302,7 @@ public:
 	virtual void VirtualFunction68 ( );																			// 0x0047A900 (0x110)
 	virtual void VirtualFunction69 ( );																			// 0x00432960 (0x114)
 	virtual void ProcessEvent ( class UFunction* pFunction, void* pParms, void* pResult = NULL );				// 0x00453120 (0x118)
+	char* GetContainingMapName();
 };
 
 UClass* UObject::pClassPointer = NULL;

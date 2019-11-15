@@ -41,7 +41,14 @@ public:
 	{ 
 		Data = NULL; 
 		Count = Max = 0; 
-	}; 
+	};
+
+	TArray(int size)
+	{
+		Data = malloc(sizeof(T) * size);
+		Max = size;
+		Count = 0;
+	};
 
 public: 
 	int Num() const
@@ -60,10 +67,13 @@ public:
 	}; 
 
 	void Add ( T InputData ) 
-	{ 
-		Data = (T*) realloc ( Data, sizeof ( T ) * ( Count + 1 ) ); 
-		Data[ Count++ ] = InputData; 
-		Max = Count; 
+	{
+		if (Count >= Max)
+		{
+			Max = Count + 3*Count/8 + 16;
+			Data = (T*)realloc(Data, sizeof(T) * Max);
+		}
+		Data[Count++] = InputData;
 	}; 
 
 	void Clear() 

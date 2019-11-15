@@ -7,6 +7,8 @@
 #include <ostream>
 #include <streambuf>
 #include <shlwapi.h>
+#include <sstream>
+#include "Strsafe.h"
 
 #include "../ME3SDK/ME3TweaksHeader.h"
 #include "../detours/detours.h"
@@ -14,6 +16,9 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 #pragma comment(lib, "detours.lib") //Library needed for Hooking part.
+#pragma comment(lib, "shlwapi.lib")
+
+TCHAR actorDumpFilePath[MAX_PATH];
 
 char* GetUObjectClassName(UObject* object)
 {
@@ -127,6 +132,52 @@ void SendMessageToMe3Explorer(USequenceOp* op)
 	}
 }
 
+void DumpActors(USequenceOp* const op)
+{
+	const auto numVarLinks = op->VariableLinks.Num();
+	const auto objCount = UObject::GObjObjects()->Count;
+	const auto objArray = UObject::GObjObjects()->Data;
+	for (auto i = 0; i < numVarLinks; i++)
+	{
+
+		if (op->VariableLinks(i).LinkedVariables.Num() == 0)
+		{
+			continue;
+		}
+		const auto seqVar = op->VariableLinks(i).LinkedVariables(0);
+		if (op->VariableLinks(i).LinkDesc == L"Actors" && IsA<USeqVar_ObjectList>(seqVar))
+		{
+			auto listVar = static_cast<USeqVar_ObjectList*>(seqVar);
+			ofstream ofs;
+			ofs.open(actorDumpFilePath);
+			const auto actorClass = AActor::StaticClass();
+			for(auto j = 0; j < objCount; j++)
+			{
+				auto obj = objArray[j];
+				if (obj && obj->IsA(actorClass))
+				{
+					auto actor = static_cast<AActor*>(obj);
+					const auto name = actor->Name.GetName();
+					if (strstr(name, "Default_"))// || actor->bStatic || !actor->bMovable)
+					{
+						continue;
+					}
+					listVar->ObjList.Add(actor);
+					ofs << actor->GetContainingMapName() << ":" << name;
+					const auto index = actor->Name.GetIndex();
+					if (index > 0)
+					{
+						ofs << '_' << index - 1;
+					}
+					ofs << endl;
+				}
+			}
+			ofs.close();
+			break;
+		}
+	}
+}
+
 void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void *pParms, void *pResult)
 {
 	if (strcmp(pObject->Class->GetName(), "SeqAct_SendMessageToME3Explorer") == 0)
@@ -135,6 +186,14 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 		if (isPartOf(funcName, "Function Engine.SequenceOp.Activated")) {
 			const auto op = static_cast<USequenceOp*>(pObject);
 			SendMessageToMe3Explorer(op);
+		}
+	}
+	else if(strcmp(pObject->Class->GetName(), "SeqAct_ME3ExpDumpActors") == 0)
+	{
+		const auto funcName = pFunction->GetFullName();
+		if (isPartOf(funcName, "Function Engine.SequenceOp.Activated")) {
+			const auto op = static_cast<USequenceOp*>(pObject);
+			DumpActors(op);
 		}
 	}
 	ProcessEvent(pObject, pFunction, pParms, pResult);
@@ -153,6 +212,11 @@ BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 	switch (dwReason)
 	{
 	case DLL_PROCESS_ATTACH:
+		GetModuleFileName(hModule, actorDumpFilePath, MAX_PATH);
+		PathRemoveFileSpec(actorDumpFilePath);
+		PathRemoveFileSpec(actorDumpFilePath);
+		StringCchCat(actorDumpFilePath, MAX_PATH, L"\\ME3ExpActorDump.txt");
+		
 		DisableThreadLibraryCalls(hModule);
 		CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)onAttach, NULL, 0, NULL);
 		return true;

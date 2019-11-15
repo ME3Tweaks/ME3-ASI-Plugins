@@ -218,5 +218,5 @@ std::string GuidToString(FGuid guid)
 
 template<typename T>
 bool IsA(UObject* object) {
-	return object->Class == T::StaticClass();
+	return object->IsA(T::StaticClass());
 }
