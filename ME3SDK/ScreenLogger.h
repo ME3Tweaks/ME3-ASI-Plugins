@@ -3,7 +3,7 @@
 #include <string>
 #include "SdkHeaders.h"
 using namespace std;
-using byte = unsigned char;
+using BYTE = unsigned char;
 
 //adapted from WarrantyVoider's ME3OnTheHook
 class ScreenLogger
@@ -13,7 +13,7 @@ class ScreenLogger
 
 	static void RenderText(wchar_t* msg, const float x, const float y, const float r, const float g, const float b, UCanvas* can)
 	{
-		can->SetDrawColor(byte(r) * 255, byte(g) * 255, byte(b) * 255, 255);
+		can->SetDrawColor(BYTE(r) * 255, BYTE(g) * 255, BYTE(b) * 255, 255);
 		can->SetPos(x, y);
 		FLinearColor drawColor;
 		drawColor.R = r;
