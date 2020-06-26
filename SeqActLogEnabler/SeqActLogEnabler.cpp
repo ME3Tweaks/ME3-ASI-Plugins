@@ -73,7 +73,12 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 				}
 				else if (IsA<USeqVar_Object>(seqVar))
 				{
-					ss << static_cast<USeqVar_Object*>(seqVar)->ObjValue->GetName() << " ";
+					const auto seqVarObj = static_cast<USeqVar_Object*>(seqVar);
+					auto referencedObj = seqVarObj->ObjValue;
+					if (referencedObj != nullptr)
+					{
+						ss << referencedObj->GetName() << " ";
+					}
 				}
 				else if (IsA<USeqVar_Name>(seqVar))
 				{
