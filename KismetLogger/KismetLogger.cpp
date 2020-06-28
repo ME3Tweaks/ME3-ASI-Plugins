@@ -15,7 +15,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #pragma comment(lib, "detours.lib") //Library needed for Hooking part.
 
-ME3TweaksASILogger logger("Kismet Logger", "KismetLog.txt");
+ME3TweaksASILogger logger("Kismet Logger v4", "KismetLog.txt");
 
 void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void *pParms, void *pResult)
 {
@@ -24,8 +24,8 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 		USequenceOp* op = (USequenceOp*)pObject;
 		char* fullname = op->GetFullName();
 		char* mapname = op->GetContainingMapName();
-		int netindex = op->NetIndex;
-		logger.writeToLog(string_format("(%s) %s_%d\n", mapname, fullname, netindex), true);
+		int instanceIndex = op->Name.GetIndex();
+		logger.writeToLog(string_format("(%s) %s_%d\n", mapname, fullname, instanceIndex), true);
 	}
 	ProcessEvent(pObject, pFunction, pParms, pResult);
 }

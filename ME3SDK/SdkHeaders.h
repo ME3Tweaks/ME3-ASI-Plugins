@@ -41,10 +41,17 @@ public:
 	{ 
 		Data = NULL; 
 		Count = Max = 0; 
-	}; 
+	};
+
+	TArray(int size)
+	{
+		Data = malloc(sizeof(T) * size);
+		Max = size;
+		Count = 0;
+	};
 
 public: 
-	int Num() 
+	int Num() const
 	{ 
 		return this->Count; 
 	}; 
@@ -60,10 +67,13 @@ public:
 	}; 
 
 	void Add ( T InputData ) 
-	{ 
-		Data = (T*) realloc ( Data, sizeof ( T ) * ( Count + 1 ) ); 
-		Data[ Count++ ] = InputData; 
-		Max = Count; 
+	{
+		if (Count >= Max)
+		{
+			Max = Count + 3*Count/8 + 16;
+			Data = (T*)realloc(Data, sizeof(T) * Max);
+		}
+		Data[Count++] = InputData;
 	}; 
 
 	void Clear() 
@@ -82,17 +92,27 @@ struct FNameEntry
 struct FName 
 { 
 	FNameEntry*		NameEntry; 
-	unsigned char	unknownData00[ 0x4 ]; 
+	UINT32	NameIndex; 
 
 	char* GetName() 
 	{ 
 		return this->NameEntry->Name; 
 	}; 
 
+	UINT32 GetIndex()
+	{
+		return this->NameIndex;
+	};
+
 	bool operator == ( const FName& A ) const 
 	{ 
 		return ( NameEntry == A.NameEntry ); 
-	}; 
+	};
+
+	bool operator == (const char* str) const
+	{
+		return strcmp(NameEntry->Name, str) == 0;
+	};
 }; 
 
 struct FString : public TArray< wchar_t > 
@@ -120,7 +140,12 @@ struct FString : public TArray< wchar_t >
 		} 
 
 		return *this; 
-	}; 
+	};
+
+	bool operator == (const wchar_t* str) const
+	{
+		return wcscmp(Data, str) == 0;
+	};
 }; 
 
 struct FScriptDelegate 
