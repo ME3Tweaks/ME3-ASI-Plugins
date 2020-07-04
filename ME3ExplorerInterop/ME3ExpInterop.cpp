@@ -132,11 +132,45 @@ void SendMessageToMe3Explorer(USequenceOp* op)
 	}
 }
 
+TArray<UObject*> Actors;
+
 void DumpActors(USequenceOp* const op)
 {
 	const auto numVarLinks = op->VariableLinks.Num();
 	const auto objCount = UObject::GObjObjects()->Count;
 	const auto objArray = UObject::GObjObjects()->Data;
+
+	Actors.Count = 0; //clear the array without de-allocating any memory.
+	ofstream ofs;
+	ofs.open(actorDumpFilePath);
+	const auto actorClass = AActor::StaticClass();
+	for (auto j = 0; j < objCount; j++)
+	{
+		auto obj = objArray[j];
+		if (obj && obj->IsA(actorClass))
+		{
+			auto actor = static_cast<AActor*>(obj);
+			const auto name = actor->Name.GetName();
+			if (strstr(name, "Default_"))// || actor->bStatic || !actor->bMovable)
+			{
+				continue;
+			}
+			Actors.Add(actor);
+			ofs << actor->GetContainingMapName() << ":" << name;
+			const auto index = actor->Name.GetIndex();
+			if (index > 0)
+			{
+				ofs << '_' << index - 1;
+			}
+			if (actor->bStatic || !actor->bMovable)
+			{
+				ofs << ":static";
+			}
+			ofs << endl;
+		}
+	}
+	ofs.close();
+	
 	for (auto i = 0; i < numVarLinks; i++)
 	{
 
@@ -145,40 +179,42 @@ void DumpActors(USequenceOp* const op)
 			continue;
 		}
 		const auto seqVar = op->VariableLinks(i).LinkedVariables(0);
-		if (op->VariableLinks(i).LinkDesc == L"Actors" && IsA<USeqVar_ObjectList>(seqVar))
+		if (op->VariableLinks(i).LinkDesc == L"Length" && IsA<USeqVar_Int>(seqVar))
 		{
-			auto listVar = static_cast<USeqVar_ObjectList*>(seqVar);
-			listVar->ObjList.Count = 0; //clear the array without de-allocating any memory.
-			ofstream ofs;
-			ofs.open(actorDumpFilePath);
-			const auto actorClass = AActor::StaticClass();
-			for(auto j = 0; j < objCount; j++)
-			{
-				auto obj = objArray[j];
-				if (obj && obj->IsA(actorClass))
-				{
-					auto actor = static_cast<AActor*>(obj);
-					const auto name = actor->Name.GetName();
-					if (strstr(name, "Default_"))// || actor->bStatic || !actor->bMovable)
-					{
-						continue;
-					}
-					listVar->ObjList.Add(actor);
-					ofs << actor->GetContainingMapName() << ":" << name;
-					const auto index = actor->Name.GetIndex();
-					if (index > 0)
-					{
-						ofs << '_' << index - 1;
-					}
-					if (actor->bStatic || !actor->bMovable)
-					{
-						ofs << ":static";
-					}
-					ofs << endl;
-				}
-			}
-			ofs.close();
+			const auto lenVar = static_cast<USeqVar_Int*>(seqVar);
+			lenVar->IntValue = Actors.Count;
 			break;
+		}
+	}
+}
+
+void AcessDumpedActorsList(USequenceOp* const op)
+{
+	const auto numVarLinks = op->VariableLinks.Num();
+	int index = 0;
+	for (auto i = 0; i < numVarLinks; i++)
+	{
+		if (op->VariableLinks(i).LinkedVariables.Num() == 0)
+		{
+			continue;
+		}
+		const auto seqVar = op->VariableLinks(i).LinkedVariables(0);
+		if (op->VariableLinks(i).LinkDesc == L"Index" && IsA<USeqVar_Int>(seqVar))
+		{
+			const auto idxVar = static_cast<USeqVar_Int*>(seqVar);
+			index = idxVar->IntValue;
+		}
+		if (op->VariableLinks(i).LinkDesc == L"Output Object" && IsA<USeqVar_Object>(seqVar))
+		{
+			const auto outputVar = static_cast<USeqVar_Object*>(seqVar);
+			if (index >= 0 && index < Actors.Count)
+			{
+				outputVar->ObjValue = Actors(index);
+			}
+			else
+			{
+				outputVar->ObjValue = nullptr;
+			}
 		}
 	}
 }
@@ -202,7 +238,7 @@ void GetCamPOV(USequenceOp* const op)
 		const auto seqVar = op->VariableLinks(i).LinkedVariables(0);
 		if (op->VariableLinks(i).LinkDesc == L"Position" && IsA<USeqVar_Vector>(seqVar))
 		{
-			auto posVar = static_cast<USeqVar_Vector*>(seqVar);
+			const auto posVar = static_cast<USeqVar_Vector*>(seqVar);
 			posVar->VectValue = cachedPOV.location;
 		}
 		else if (op->VariableLinks(i).LinkDesc == L"Rotation" && IsA<USeqVar_Vector>(seqVar))
@@ -217,8 +253,8 @@ void GetCamPOV(USequenceOp* const op)
 			rotVect.X = cp * cy;
 			rotVect.Y = cp * sy;
 			rotVect.Z = sp;
-			
-			auto rotVar = static_cast<USeqVar_Vector*>(seqVar);
+
+			auto* rotVar = static_cast<USeqVar_Vector*>(seqVar);
 			rotVar->VectValue = rotVect;
 		}
 	}
@@ -226,7 +262,8 @@ void GetCamPOV(USequenceOp* const op)
 
 void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void *pParms, void *pResult)
 {
-	if (strcmp(pObject->Class->GetName(), "SeqAct_SendMessageToME3Explorer") == 0)
+	const auto className = pObject->Class->GetName();
+	if (strcmp(className, "SeqAct_SendMessageToME3Explorer") == 0)
 	{
 		const auto funcName = pFunction->GetFullName();
 		if (isPartOf(funcName, "Function Engine.SequenceOp.Activated")) {
@@ -234,7 +271,7 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 			SendMessageToMe3Explorer(op);
 		}
 	}
-	else if(strcmp(pObject->Class->GetName(), "SeqAct_ME3ExpDumpActors") == 0)
+	else if(strcmp(className, "SeqAct_ME3ExpDumpActors") == 0)
 	{
 		const auto funcName = pFunction->GetFullName();
 		if (isPartOf(funcName, "Function Engine.SequenceOp.Activated")) {
@@ -242,7 +279,15 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 			DumpActors(op);
 		}
 	}
-	else if (strcmp(pObject->Class->GetName(), "SeqAct_ME3ExpGetPlayerCamPOV") == 0)
+	else if (strcmp(className, "SeqAct_ME3ExpAcessDumpedActorsList") == 0)
+	{
+		const auto funcName = pFunction->GetFullName();
+		if (isPartOf(funcName, "Function Engine.SequenceOp.Activated")) {
+			const auto op = static_cast<USequenceOp*>(pObject);
+			AcessDumpedActorsList(op);
+		}
+	}
+	else if (strcmp(className, "SeqAct_ME3ExpGetPlayerCamPOV") == 0)
 	{
 		const auto funcName = pFunction->GetFullName();
 		if (isPartOf(funcName, "Function Engine.SequenceOp.Activated")) {
