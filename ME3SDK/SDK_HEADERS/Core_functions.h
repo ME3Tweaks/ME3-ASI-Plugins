@@ -98,7 +98,39 @@ char* UObject::GetFullName()
 	} 
 
 	return "(null)"; 
-} 
+}
+
+/// <summary>
+/// Gets full name without class string
+/// </summary>
+/// <returns></returns>
+char* UObject::GetFullNameNoClass()
+{
+	if (this->Outer)
+	{
+		static char cOutBuffer[256];
+
+		if (this->Outer->Outer)
+		{
+
+			strcat_s(cOutBuffer, this->Outer->Outer->GetName());
+			strcat_s(cOutBuffer, ".");
+			strcat_s(cOutBuffer, this->Outer->GetName());
+			strcat_s(cOutBuffer, ".");
+			strcat_s(cOutBuffer, this->GetName());
+		}
+		else
+		{
+			strcat_s(cOutBuffer, this->Outer->GetName());
+			strcat_s(cOutBuffer, ".");
+			strcat_s(cOutBuffer, this->GetName());
+		}
+
+		return cOutBuffer;
+	}
+
+	return "(null)";
+}
 
 //Used to get debug info about outer
 char* UObject::GetFullName2()
