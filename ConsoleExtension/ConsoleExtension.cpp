@@ -31,7 +31,7 @@ auto savedCamsFileName = "savedCams";
 
 wstringstream& operator<<(wstringstream& ss, const FString& fStr)
 {
-	
+
 	for (auto i = 0; i < fStr.Num() && fStr(i) != 0; i++)
 	{
 		ss << fStr(i);
@@ -43,9 +43,9 @@ FTPOV cachedPOV;
 FTPOV povToLoad;
 bool shouldSetCamPOV;
 
-FTPOV savedPOVs [10];
+FTPOV savedPOVs[10];
 
-void HandleConsoleCommand(const wstring &cmd)
+void HandleConsoleCommand(USFXConsole* console, const wstring& cmd)
 {
 	if (cmd.rfind(L"savecam ") == 0 && cmd.length() == 9)
 	{
@@ -66,9 +66,29 @@ void HandleConsoleCommand(const wstring &cmd)
 			shouldSetCamPOV = true;
 		}
 	}
+	else if (cmd == L"superspeed") {
+		auto playerpawns = FindObjectsOfType(ASFXPawn_Player::StaticClass());
+		for (int i = 0; i < playerpawns.Count; i++) {
+			auto playerpawn = (ASFXPawn_Player*)playerpawns.Data[i];
+			playerpawn->GroundSpeed = 6000.0;
+			playerpawn->CombatGroundSpeed = 6000.0;
+			playerpawn->StormSpeed = 10000.0;
+			playerpawn->AccelRate = 4000.0;
+		}
+	}
+	else if (cmd == L"normalspeed") {
+		auto playerpawns = FindObjectsOfType(ASFXPawn_Player::StaticClass());
+		for (int i = 0; i < playerpawns.Count; i++) {
+			auto playerpawn = (ASFXPawn_Player*)playerpawns.Data[i];
+			playerpawn->GroundSpeed = 400.0;
+			playerpawn->CombatGroundSpeed = 350.0;
+			playerpawn->StormSpeed = 700.0; 
+			playerpawn->AccelRate = 1500.0;
+		}
+	}
 }
 
-void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void *pParms, void *pResult)
+void __fastcall HookedPE(UObject* pObject, void* edx, UFunction* pFunction, void* pParms, void* pResult)
 {
 	const auto funcName = pFunction->GetFullName();
 	if (IsA<USFXConsole>(pObject) && isPartOf(funcName, "Function Console.Typing.InputChar"))
@@ -79,7 +99,7 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 			const auto console = static_cast<USFXConsole*>(pObject);
 			wstringstream ss;
 			ss << console->TypedStr;
-			HandleConsoleCommand(ss.str());
+			HandleConsoleCommand(console, ss.str());
 #if LOGGING 
 			ss << endl;
 			const wstring msg = ss.str();
@@ -87,7 +107,7 @@ void __fastcall HookedPE(UObject *pObject, void *edx, UFunction *pFunction, void
 			screenLogger.LogMessage(msg);
 #endif
 
-		}
+}
 	}
 #if LOGGING
 	else if (!strcmp(funcName, "Function SFXGame.BioHUD.PostRender"))

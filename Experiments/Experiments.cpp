@@ -92,7 +92,7 @@ void __fastcall HookedPE(UObject* pObject, void* edx, UFunction* pFunction, void
 				str = string_format("Hit component: %s_%d", HitInfo.HitComponent->GetFullName(), HitInfo.HitComponent->Name.GetIndex() - 1);
 				widestr = std::wstring(str.begin(), str.end());
 				debugCameraHud->Canvas->DrawText(FString(const_cast<wchar_t*>(widestr.c_str())), false, 1.0f, 1.0f, NULL);
-				HitInfo.HitComponent->
+			//	HitInfo.HitComponent->
 			}
 
 			//logger.writeToLog(string_format("(%s) %s_%d\n", mapname, fullname, instanceIndex), true);

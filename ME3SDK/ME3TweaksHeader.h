@@ -16,6 +16,32 @@ using namespace std;
 typedef void(__thiscall *tProcessEvent)(class UObject *, class UFunction *, void *, void *);
 tProcessEvent ProcessEvent = (tProcessEvent)0x00453120;
 
+/// <summary>
+/// Gets objects in memory of a specific class type. Returns a TArray with objects that can be casted to that type.
+/// </summary>
+/// <param name="type"></param>
+/// <returns></returns>
+TArray<UObject*> FindObjectsOfType(UClass* type)
+{
+	TArray<UObject*> foundObjects;
+	const auto objCount = UObject::GObjObjects()->Count;
+	const auto objArray = UObject::GObjObjects()->Data;
+	for (auto j = 0; j < objCount; j++)
+	{
+		auto obj = objArray[j];
+		if (obj && obj->IsA(type))
+		{
+			const auto name = obj->Name.GetName();
+			if (strstr(name, "Default_"))// || actor->bStatic || !actor->bMovable)
+			{
+				continue;
+			}
+			foundObjects.Add(obj);
+		}
+	}
+	return foundObjects;
+}
+
 const std::string string_format(const char * const zcFormat, ...) {
 
 	// initialize use of the variable argument array
