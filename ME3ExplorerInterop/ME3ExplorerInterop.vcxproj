@@ -102,10 +102,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ME3ExpInterop.h" />
-    <ClInclude Include="resource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="KismetLogger.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
