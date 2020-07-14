@@ -42,6 +42,31 @@ TArray<UObject*> FindObjectsOfType(UClass* type)
 	return foundObjects;
 }
 
+/// <summary>
+/// Gets the first object in memory of the specified type. Ensure you check for NULL.
+/// </summary>
+/// <param name="type"></param>
+/// <returns></returns>
+UObject* FindObjectOfType(UClass* type)
+{
+	const auto objCount = UObject::GObjObjects()->Count;
+	const auto objArray = UObject::GObjObjects()->Data;
+	for (auto j = 0; j < objCount; j++)
+	{
+		auto obj = objArray[j];
+		if (obj && obj->IsA(type))
+		{
+			const auto name = obj->Name.GetName();
+			if (strstr(name, "Default_"))// || actor->bStatic || !actor->bMovable)
+			{
+				continue;
+			}
+			return obj;
+		}
+	}
+	return NULL;
+}
+
 const std::string string_format(const char * const zcFormat, ...) {
 
 	// initialize use of the variable argument array

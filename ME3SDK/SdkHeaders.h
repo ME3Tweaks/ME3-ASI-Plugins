@@ -56,6 +56,10 @@ public:
 		return this->Count; 
 	}; 
 
+	bool Any() const {
+		return this->Count > 0;
+	}
+
 	T& operator() ( int i ) 
 	{ 
 		return this->Data[ i ]; 
