@@ -20,7 +20,7 @@
 #define LOGGING 1
 
 #if LOGGING 
-ME3TweaksASILogger logger("Origin MP Status v2", "OriginMPStatus.txt", false);
+ME3TweaksASILogger logger("Origin MP Status v2", "OriginMPStatus.txt", true);
 #endif
 
 
@@ -157,28 +157,102 @@ DWORD WINAPI RichPresenceUpdater(LPVOID lpParam)
 
 void __fastcall HookedPE(UObject* pObject, void* edx, UFunction* pFunction, void* pParms, void* pResult)
 {
-	const auto funcName = pFunction->GetFullName();
-	if (IsA<USFXConsole>(pObject) && isPartOf(funcName, "Function Console.Typing.InputChar"))
+	char* funcName = pFunction->GetFullName();
+	if (isPartOf(funcName, "sfxwavecoordinator"))
 	{
-		const auto inputCharParams = static_cast<UConsole_execInputChar_Parms*>(pParms);
-		if (inputCharParams->Unicode.Count >= 1 && inputCharParams->Unicode(0) == '\r')
-		{
-			const auto console = static_cast<USFXConsole*>(pObject);
-			wstringstream ss;
-			auto origincomp = (USFXOnlineComponentOrigin*)FindObjectOfType(USFXOnlineComponentOrigin::StaticClass());
-			if (origincomp) {
-				wsprintfW(presencetext, L"Test");
-				if (wcscmp(currentpresencetext, presencetext) != 0) {
-					//difference
-					bool result = origincomp->SetRichPresence(presencetext, L"Ahoy");
-					if (result == 1) {
-						wcsncpy(currentpresencetext, presencetext, 256);
-					}
+		logger.writeToConsoleOnly(string_format("%s\n", funcName), true);
+	}
+	if (isPartOf(funcName, "Function sfxgamempcontent.sfxwavecoordinator_hordeoperation.EndWaves"))
+	{
+		auto origincomp = (USFXOnlineComponentOrigin*)FindObjectOfType(USFXOnlineComponentOrigin::StaticClass());
+		if (origincomp) {
+			memset(presencetext, 0, 256);
+			if (wcscmp(currentpresencetext, presencetext) != 0) {
+				//difference
+				bool result = origincomp->SetRichPresence(presencetext, L"");
+				if (result == 1) {
+					wcsncpy_s(currentpresencetext, presencetext, 256);
 				}
-
 			}
 		}
 	}
+	else if (isPartOf(funcName, "Function sfxgamempcontent.sfxwavecoordinator_hordeoperation.OnAllWavesFinishedLoading"))
+	{
+		if (IsA<Asfxwavecoordinator_hordeoperation>(pObject)) {
+			// For string lookups
+			auto sfxgame = (ASFXGame*)ASFXGame::StaticClass();
+			// for getting info
+			auto uengine = (UEngine*)UEngine::StaticClass();
+			auto CurrWorld = (AWorldInfo*)uengine->GetCurrentWorldInfo();
+			auto grimp = (Asfxgrimp*)CurrWorld->GRI;
+			auto sfxonlinegamesettings = (USFXOnlineGameSettings*)FindObjectOfType(USFXOnlineGameSettings::StaticClass());
+			if (sfxgame && uengine && CurrWorld && grimp && sfxonlinegamesettings) {
+				// DIFFICULTY
+				int difficultyIndex = grimp->GetChallengeTypeIndex();
+				int diffStrRef = (int)sfxonlinegamesettings->ChallengeTypes.Data[difficultyIndex].Name;
+
+				auto difficultyStr = sfxgame->GetSimpleString(diffStrRef, false);
+				//logger.writeToConsoleOnly(L"Difficulty: %s\n", difficultyStr.Data), true);
+
+				// FACTION
+				int enemyTypeStrRef = 0;
+				int enemyTypeID = grimp->GetEnemyWaveTypeID();
+				for (int i = 0; i < sfxonlinegamesettings->EnemyTypes.Count; i++)
+				{
+					auto enemyType = sfxonlinegamesettings->EnemyTypes.Data[enemyTypeID];
+					if (enemyType.Id == enemyTypeID) {
+						enemyTypeStrRef = enemyType.Name;
+						break;
+					}
+				}
+				auto enemyTypeName = sfxgame->GetSimpleString(enemyTypeStrRef, false);
+
+				// MAP NAME
+				auto mapPackageName = sfxonlinegamesettings->mME3MapName;
+				int mapStrRef = 0;
+				for (int i = 0; i < sfxonlinegamesettings->MasterMapList.Count; i++)
+				{
+					auto mapinfo = sfxonlinegamesettings->MasterMapList.Data[i];
+					if (mapinfo.PackageName.Data) { //some of these don't have to be initialized
+						if (mapinfo.PackageName == mapPackageName)
+						{
+							mapStrRef = mapinfo.PrettyName;
+							break;
+						}
+					}
+				}
+
+				auto mapName = sfxgame->GetSimpleString(mapStrRef, false);
+				//logger.writeToConsoleOnly(string_format("Map Name: %s\n", mapName), true);
+
+				// FACTION
+
+
+				// WAVE INDEX
+				auto sfxwaveCoordinator = static_cast<Asfxwavecoordinator_hordeoperation*>(pObject);
+				int waveindex = sfxwaveCoordinator->GetFriendlyCurrentWaveNumber();
+				//logger.writeToConsoleOnly(string_format("Friendly wave number: %d\n", waveindex), true);
+
+
+				auto origincomp = (USFXOnlineComponentOrigin*)FindObjectOfType(USFXOnlineComponentOrigin::StaticClass());
+				if (origincomp && mapName.Data && difficultyStr.Data && enemyTypeName.Data) {
+					swprintf(presencetext, 256, L"%s/%s/%s Wave %d", mapName.Data, enemyTypeName.Data, difficultyStr.Data, waveindex);
+					if (wcscmp(currentpresencetext, presencetext) != 0) {
+						//difference
+						bool result = origincomp->SetRichPresence(presencetext, L"");
+						if (result == 1) {
+							wcsncpy_s(currentpresencetext, presencetext, 256);
+						}
+					}
+				}
+			}
+		}
+	}
+	//else if (isPartOf(funcName, "Wave"))
+	//{
+	//	logger.writeToConsoleOnly(string_format("%s\n", funcName), true);
+	//}
+	ProcessEvent(pObject, pFunction, pParms, pResult);
 }
 
 void onAttach()
