@@ -7739,7 +7739,7 @@ public:
 	unsigned char GetIDByClass ( class UClass* PlayerClass );
 	class ASFXPawn_Player* GetPlayer ( int ControllerId );
 	void SortActorsByAngle ( struct FVector RefLocation, struct FRotator RefRotation, unsigned long bPreferBioPawns, TArray< class AActor* >* List );
-	struct FString GetSimpleString ( void* StrRef, unsigned long bParse );
+	struct FString GetSimpleString ( int StrRef, unsigned long bParse );
 	void SetGameSpeed ( float T );
 	bool ChangeTeam ( class AController* Other, int N, unsigned long bNewTeam );
 	void InitializeTeams ( );

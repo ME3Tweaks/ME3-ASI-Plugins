@@ -67,7 +67,7 @@ UObject* FindObjectOfType(UClass* type)
 	return NULL;
 }
 
-const std::string string_format(const char * const zcFormat, ...) {
+const std::string string_format(const char* const zcFormat, ...) {
 
 	// initialize use of the variable argument array
 	va_list vaArgs;
@@ -89,6 +89,11 @@ const std::string string_format(const char * const zcFormat, ...) {
 	return std::string(zc.data(), iLen);
 }
 
+/// <summary>
+/// Converts a widestring (wstring) to wchar_t
+/// </summary>
+/// <param name="wstr"></param>
+/// <returns></returns>
 inline std::string ws2s(const std::wstring& wstr)
 {
 	using convert_typeX = std::codecvt_utf8<wchar_t>;
@@ -133,10 +138,20 @@ public:
 		writeToLog("--------------------------------------------------------\n", false);
 	}
 
+	/// <summary>
+	/// Writes the specified string to the log file on disk.
+	/// </summary>
+	/// <param name="str"></param>
+	/// <param name="bTimeStamp"></param>
 	void writeToDiskOnly(const wstring str, const bool bTimeStamp) {
 		writeToDiskOnly(ws2s(str), bTimeStamp);
 	}
 
+	/// <summary>
+	/// Writes the specified string to the log file on disk.
+	/// </summary>
+	/// <param name="str"></param>
+	/// <param name="bTimeStamp"></param>
 	void writeToDiskOnly(string str, bool bTimeStamp) {
 		if (bTimeStamp) {
 			string timeStamp = getTimestampStr();
@@ -152,10 +167,20 @@ public:
 		}
 	}
 
+	/// <summary>
+	/// Writes the specified string to the console only. Ensure you add a newline yourself.
+	/// </summary>
+	/// <param name="str"></param>
+	/// <param name="bTimeStamp"></param>
 	void writeToConsoleOnly(const wstring str, const bool bTimeStamp) {
 		writeToConsoleOnly(ws2s(str), bTimeStamp);
 	}
 
+	/// <summary>
+	/// Writes the specified string to the console only. Ensure you add a newline yourself.
+	/// </summary>
+	/// <param name="str"></param>
+	/// <param name="bTimeStamp"></param>
 	void writeToConsoleOnly(string str, bool bTimeStamp) {
 		if (bTimeStamp) {
 			string timeStamp = getTimestampStr();
@@ -166,10 +191,20 @@ public:
 		std::cout << str;
 	}
 
+	/// <summary>
+	/// Writes to both the console and the log file.
+	/// </summary>
+	/// <param name="str"></param>
+	/// <param name="bTimeStamp"></param>
 	void writeToLog(const wstring str, const bool bTimeStamp) {
 		writeToLog(ws2s(str), bTimeStamp);
 	}
 
+	/// <summary>
+	/// Writes to both the console and the log file.
+	/// </summary>
+	/// <param name="str"></param>
+	/// <param name="bTimeStamp"></param>
 	void writeToLog(string str, bool bTimeStamp) {
 		if (bTimeStamp) {
 			string timeStamp = getTimestampStr();
@@ -217,7 +252,7 @@ private:
 };
 
 
-/*Checks if w1 is part of w2*/
+/*Checks if w2 is part of w1*/
 bool isPartOf(char* w1, char* w2)
 {
 	int i = 0;

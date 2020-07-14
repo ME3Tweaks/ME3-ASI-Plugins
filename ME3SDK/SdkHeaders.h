@@ -146,6 +146,16 @@ struct FString : public TArray< wchar_t >
 		return *this; 
 	};
 
+	/// <summary>
+	/// Checks if the string content of this FString matches the other
+	/// </summary>
+	/// <param name="other"></param>
+	/// <returns></returns>
+	bool operator == (FString other) const
+	{
+		return wcscmp(Data, other.Data) == 0;
+	};
+	
 	bool operator == (const wchar_t* str) const
 	{
 		return wcscmp(Data, str) == 0;
