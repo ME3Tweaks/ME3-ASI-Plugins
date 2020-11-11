@@ -10,10 +10,19 @@
 #include <vector>
 #include <locale> 
 #include <codecvt>
+#ifndef _NOSDK
 #include "SdkHeaders.h"
+#endif
+
+
 using namespace std;
 
-typedef void(__thiscall *tProcessEvent)(class UObject *, class UFunction *, void *, void *);
+char GetBit(int value, int bit) {
+	return (value >> bit) & 1;
+}
+
+#ifndef _NOSDK
+typedef void(__thiscall* tProcessEvent)(class UObject*, class UFunction*, void*, void*);
 tProcessEvent ProcessEvent = (tProcessEvent)0x00453120;
 
 /// <summary>
@@ -67,6 +76,24 @@ UObject* FindObjectOfType(UClass* type)
 	return NULL;
 }
 
+std::string GuidToString(FGuid guid)
+{
+	char guid_cstr[39];
+	snprintf(guid_cstr, sizeof(guid_cstr),
+		"{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
+		guid.A, guid.B, guid.C,
+		GetBit(guid.D, 0), GetBit(guid.D, 1), GetBit(guid.D, 2), GetBit(guid.D, 3),
+		GetBit(guid.D, 4), GetBit(guid.D, 5), GetBit(guid.D, 6), GetBit(guid.D, 7));
+
+	return std::string(guid_cstr);
+}
+
+template<typename T>
+bool IsA(UObject* object) {
+	return object->IsA(T::StaticClass());
+}
+#endif
+
 const std::string string_format(const char* const zcFormat, ...) {
 
 	// initialize use of the variable argument array
@@ -105,9 +132,9 @@ inline std::string ws2s(const std::wstring& wstr)
 class ME3TweaksASILogger
 {
 public:
-	char* logfname;
+	const char* logfname;
 
-	ME3TweaksASILogger(char* loggername, char* _logfname, bool console = true) {
+	ME3TweaksASILogger(const char* loggername, const char* _logfname, bool console = true) {
 		logfname = _logfname;
 		fopen_s(&log, logfname, "w");
 
@@ -172,8 +199,8 @@ public:
 	/// </summary>
 	/// <param name="str"></param>
 	/// <param name="bTimeStamp"></param>
-	void writeToConsoleOnly(const wstring str, const bool bTimeStamp) {
-		writeToConsoleOnly(ws2s(str), bTimeStamp);
+	void writeToConsoleOnly(const wstring str, const bool bTimeStamp, bool newLine = false) {
+		writeToConsoleOnly(ws2s(str), bTimeStamp, newLine);
 	}
 
 	/// <summary>
@@ -181,14 +208,18 @@ public:
 	/// </summary>
 	/// <param name="str"></param>
 	/// <param name="bTimeStamp"></param>
-	void writeToConsoleOnly(string str, bool bTimeStamp) {
+	void writeToConsoleOnly(string str, bool bTimeStamp, bool newLine = false) {
 		if (bTimeStamp) {
 			string timeStamp = getTimestampStr();
 			std::cout << timeStamp;
+
 			//free((char*)timeStamp);
 		}
-
 		std::cout << str;
+		if (newLine)
+		{
+			std::cout << endl;
+		}
 	}
 
 	/// <summary>
@@ -196,8 +227,8 @@ public:
 	/// </summary>
 	/// <param name="str"></param>
 	/// <param name="bTimeStamp"></param>
-	void writeToLog(const wstring str, const bool bTimeStamp) {
-		writeToLog(ws2s(str), bTimeStamp);
+	void writeToLog(const wstring str, const bool bTimeStamp, bool newLine = false) {
+		writeToLog(ws2s(str), bTimeStamp, newLine);
 	}
 
 	/// <summary>
@@ -205,7 +236,7 @@ public:
 	/// </summary>
 	/// <param name="str"></param>
 	/// <param name="bTimeStamp"></param>
-	void writeToLog(string str, bool bTimeStamp) {
+	void writeToLog(string str, bool bTimeStamp, bool newLine = false) {
 		if (bTimeStamp) {
 			string timeStamp = getTimestampStr();
 			std::cout << timeStamp;
@@ -216,7 +247,15 @@ public:
 			std::cout << "LOG ISNT INITALIZED";
 		}*/
 		fprintf(log, "%s", str.c_str());
+		if (newLine)
+		{
+			fprintf(log, "\n");
+		}
 		std::cout << str;
+		if (newLine)
+		{
+			std::cout << endl;
+		}
 
 		if (numLinesWritten > 10) {
 			fflush(log);
@@ -284,25 +323,4 @@ std::string wchar2string(wchar_t* str)
 	while (*str)
 		mystring += (char)*str++;
 	return  mystring;
-}
-
-char GetBit(int value, int bit) {
-	return (value >> bit) & 1;
-}
-
-std::string GuidToString(FGuid guid)
-{
-	char guid_cstr[39];
-	snprintf(guid_cstr, sizeof(guid_cstr),
-		"{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
-		guid.A, guid.B, guid.C,
-		GetBit(guid.D, 0), GetBit(guid.D, 1), GetBit(guid.D, 2), GetBit(guid.D, 3),
-		GetBit(guid.D, 4), GetBit(guid.D, 5), GetBit(guid.D, 6), GetBit(guid.D, 7));
-
-	return std::string(guid_cstr);
-}
-
-template<typename T>
-bool IsA(UObject* object) {
-	return object->IsA(T::StaticClass());
 }
