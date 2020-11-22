@@ -129,6 +129,24 @@ inline std::string ws2s(const std::wstring& wstr)
 	return converterX.to_bytes(wstr);
 }
 
+/// <summary>
+/// Converts a string to a wide string
+/// </summary>
+/// <param name="multi"></param>
+/// <returns></returns>
+std::wstring s2ws(const std::string& multi) {
+	std::wstring wide; wchar_t w; mbstate_t mb{};
+	size_t n = 0, len = multi.length() + 1;
+	while (auto res = mbrtowc(&w, multi.c_str() + n, len - n, &mb)) {
+		if (res == size_t(-1) || res == size_t(-2))
+			throw "invalid encoding";
+
+		n += res;
+		wide += w;
+	}
+	return wide;
+}
+
 class ME3TweaksASILogger
 {
 public:

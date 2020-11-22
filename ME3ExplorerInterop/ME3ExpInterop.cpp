@@ -18,7 +18,7 @@
 #pragma comment(lib, "detours.lib") //Library needed for Hooking part.
 #pragma comment(lib, "shlwapi.lib")
 
-TCHAR actorDumpFilePath[MAX_PATH];
+TCHAR SplashPath[MAX_PATH];
 
 char* GetUObjectClassName(UObject* object)
 {
@@ -142,7 +142,7 @@ void DumpActors(USequenceOp* const op)
 
 	Actors.Count = 0; //clear the array without de-allocating any memory.
 	ofstream ofs;
-	ofs.open(actorDumpFilePath);
+	ofs.open(SplashPath);
 	const auto actorClass = AActor::StaticClass();
 	for (auto j = 0; j < objCount; j++)
 	{
@@ -316,10 +316,10 @@ BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 	switch (dwReason)
 	{
 	case DLL_PROCESS_ATTACH:
-		GetModuleFileName(hModule, actorDumpFilePath, MAX_PATH);
-		PathRemoveFileSpec(actorDumpFilePath);
-		PathRemoveFileSpec(actorDumpFilePath);
-		StringCchCat(actorDumpFilePath, MAX_PATH, L"\\ME3ExpActorDump.txt");
+		GetModuleFileName(hModule, SplashPath, MAX_PATH);
+		PathRemoveFileSpec(SplashPath);
+		PathRemoveFileSpec(SplashPath);
+		StringCchCat(SplashPath, MAX_PATH, L"\\ME3ExpActorDump.txt");
 		
 		DisableThreadLibraryCalls(hModule);
 		CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)onAttach, NULL, 0, NULL);

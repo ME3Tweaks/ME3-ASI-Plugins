@@ -20,7 +20,7 @@
 #pragma comment(lib, "detours.lib") //Library needed for Hooking part.
 
 
-#define LOGGING 0
+#define LOGGING 1
 
 #if LOGGING 
 ME3TweaksASILogger logger("ConsoleExtension v1", "ConsoleExtension.txt", false);
@@ -45,6 +45,8 @@ bool shouldSetCamPOV;
 
 FTPOV savedPOVs[10];
 
+wchar_t presencetext[256];
+wchar_t currentpresencetext[256];
 void HandleConsoleCommand(USFXConsole* console, const wstring& cmd)
 {
 	if (cmd.rfind(L"savecam ") == 0 && cmd.length() == 9)
@@ -82,7 +84,7 @@ void HandleConsoleCommand(USFXConsole* console, const wstring& cmd)
 			auto playerpawn = (ASFXPawn_Player*)playerpawns.Data[i];
 			playerpawn->GroundSpeed = 400.0;
 			playerpawn->CombatGroundSpeed = 350.0;
-			playerpawn->StormSpeed = 700.0; 
+			playerpawn->StormSpeed = 700.0;
 			playerpawn->AccelRate = 1500.0;
 		}
 	}
@@ -107,7 +109,7 @@ void __fastcall HookedPE(UObject* pObject, void* edx, UFunction* pFunction, void
 			screenLogger.LogMessage(msg);
 #endif
 
-}
+		}
 	}
 #if LOGGING
 	else if (!strcmp(funcName, "Function SFXGame.BioHUD.PostRender"))

@@ -16,8 +16,11 @@
 #pragma comment(lib, "detours.lib") //Library needed for Hooking part.
 
 //ME3TweaksASILogger logger("Match Stats Collector", "MatchStats.txt");
-ME3TweaksASILogger logger("MP Controller Client Fix", "WorldInfo.txt");
+//ME3TweaksASILogger logger("MP Controller Client Fix", "WorldInfo.txt");
+ME3TweaksASILogger logger("Experiments", "Experiments.txt");
 bool logNextTick = false;
+int interval = 60 * 10; //7 seconds (or 60fps ticks)
+int currentTick = 0;
 
 FVector inline RotationToVector(FRotator Rotation) {
 	FVector Vector;
@@ -35,7 +38,19 @@ FVector inline RotationToVector(FRotator Rotation) {
 void __fastcall HookedPE(UObject* pObject, void* edx, UFunction* pFunction, void* pParms, void* pResult)
 {
 	char* szName = pFunction->GetFullName();
-	//if (isPartOf(szName, "Function Engine.DebugCameraHUD.PostRender"))
+	if (strcmp(szName, "Function SFXGame.SFXSFHandler_PCPersonalization.Update") == 0)
+	{
+		if (currentTick >= interval)
+		{
+			currentTick -= interval;
+			logger.writeToConsoleOnly(L"Garbage collecting.\n", true);
+			auto sfxHandler = static_cast<USFXSFHandler_PCPersonalization*>(pObject);
+			sfxHandler->oWorldInfo->ForceGarbageCollection(false);
+		} else
+		{
+			currentTick++;
+		}
+	}
 	//{
 	//	ProcessEvent(pObject, pFunction, pParms, pResult);
 	//	ADebugCameraHUD* debugCameraHud = (ADebugCameraHUD*)pObject;
@@ -114,24 +129,24 @@ void __fastcall HookedPE(UObject* pObject, void* edx, UFunction* pFunction, void
 	//	}*/
 	//}
 	//else 
-	if (isPartOf(szName, "Function SFXGame.SFXConsole.InputKey")) {
-		USFXConsole_execInputKey_Parms* params = (USFXConsole_execInputKey_Parms*)pParms;
-		//Event: 0 - > Down
-		//Event: 1 - > Up
-		//Event: 2 - > Holding
-		//logger.writeToConsoleOnly(string_format("Key pressed: %u %s\n", params->Event, params->Key.GetName()), true);
-		if (isPartOf(params->Key.GetName(), "Xbox")) {
-			if (params->Event == 0) {
-				logger.writeToConsoleOnly(string_format("%s DOWN\n", params->Key.GetName()), true);
-			}
-			else if (params->Event == 1) {
-				logger.writeToConsoleOnly(string_format("%s UP\n", params->Key.GetName()), true);
-			}
-			else if (params->Event == 2) {
-				logger.writeToConsoleOnly(string_format("%s HOLD\n", params->Key.GetName()), true);
-			}
-		}
-	}
+	//if (isPartOf(szName, "Function SFXGame.SFXConsole.InputKey")) {
+	//	USFXConsole_execInputKey_Parms* params = (USFXConsole_execInputKey_Parms*)pParms;
+	//	//Event: 0 - > Down
+	//	//Event: 1 - > Up
+	//	//Event: 2 - > Holding
+	//	//logger.writeToConsoleOnly(string_format("Key pressed: %u %s\n", params->Event, params->Key.GetName()), true);
+	//	if (isPartOf(params->Key.GetName(), "Xbox")) {
+	//		if (params->Event == 0) {
+	//			logger.writeToConsoleOnly(string_format("%s DOWN\n", params->Key.GetName()), true);
+	//		}
+	//		else if (params->Event == 1) {
+	//			logger.writeToConsoleOnly(string_format("%s UP\n", params->Key.GetName()), true);
+	//		}
+	//		else if (params->Event == 2) {
+	//			logger.writeToConsoleOnly(string_format("%s HOLD\n", params->Key.GetName()), true);
+	//		}
+	//	}
+	//}
 	ProcessEvent(pObject, pFunction, pParms, pResult);
 }
 
@@ -172,17 +187,18 @@ BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 	{
 	case DLL_PROCESS_ATTACH:
 		// Check if DLC_MOD_ControllerSupport exists at ..\..\BioGame\DLC
-		if (dirExists("..\\..\\BIOGame\\DLC\\DLC_MOD_ControllerSupport") != 0)
-		{
-			DisableThreadLibraryCalls(hModule);
-			CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)onAttach, NULL, 0, NULL);
-		}
-		/*else
-		{
-			MessageBoxW(NULL, L"Controller mod not installed!", L"Error!", MB_ICONEXCLAMATION | MB_OK);
-		}*/
-		//doesn't exist otherwise
-		return true;
+		//MessageBox(NULL, L"Take snapshot now.", L"Stall ASI", MB_ICONINFORMATION);
+		//if (dirExists("..\\..\\BIOGame\\DLC\\DLC_MOD_ControllerSupport") != 0)
+		//{
+		DisableThreadLibraryCalls(hModule);
+		CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)onAttach, NULL, 0, NULL);
+		//}
+		///*else
+		//{
+		//	MessageBoxW(NULL, L"Controller mod not installed!", L"Error!", MB_ICONEXCLAMATION | MB_OK);
+		//}*/
+		////doesn't exist otherwise
+		//return true;
 		break;
 
 	case DLL_PROCESS_DETACH:
