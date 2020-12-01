@@ -2,7 +2,6 @@
 #include <sstream>
 #include "../ME3SDK/ME3TweaksHeader.h"
 #include "../detours/detours.h"
-#define _CRT_SECURE_NO_WARNINGS
 #pragma comment(lib, "detours.lib") //Library needed for Hooking part.
 #pragma comment( lib, "psapi.lib" )
 #include <psapi.h>
@@ -26,7 +25,7 @@ BOOL critVisible = true;
 static void RenderTextSLH(std::wstring msg, const float x, const float y, const char r, const char g, const char b, const float alpha, UCanvas* can)
 {
 	can->SetDrawColor(r, g, b, alpha * 255);
-	can->SetPos(x, y);
+	can->SetPos(x, y + 64); //+ is Y start. To prevent overlay on top of the power bar thing
 	FLinearColor drawColor;
 	drawColor.R = r;
 	drawColor.G = g;
