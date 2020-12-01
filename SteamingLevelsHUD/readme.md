@@ -1,2 +1,4 @@
-# Garbage Collection Forcer ASI
-This ASI will make the garbage collector run more often in Mass Effect 3. v1.0 of this ASI mod runs every 8 seconds while the Armor Locker is open. For this to have any effect the OnPawnAppearanceChanged() method in the SFXHandler_Personalization class in SFXGame needs to be patched to do nothing. This patch is automatically applied by ALOT Installer V4.
+# Streaming Levels HUD ASI
+This ASI draws the list of streaming levels on the top left of the screen, as well as their current loaded state. It additionally shows the amount of memory the process is currently using, as well as as the maximum. When the amount nears the crashing point (3.5GiB), it turns, yellow, red, then begins to flash red.
+
+![Preview](https://i.imgur.com/KmJbNTZ.png)
