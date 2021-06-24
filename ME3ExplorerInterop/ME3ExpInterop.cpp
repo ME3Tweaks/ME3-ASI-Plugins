@@ -116,7 +116,11 @@ void SendMessageToMe3Explorer(USequenceOp* op)
 	}
 	msgBuffer[writePos] = 0;
 	writePos++;
-	const auto handle = FindWindow(nullptr, L"ME3Explorer");
+	auto handle = FindWindow(nullptr, L"Legendary Explorer");
+	if (!handle)
+	{
+		handle = FindWindow(nullptr, L"ME3Explorer");
+	}
 	if (handle)
 	{
 		constexpr unsigned long SENT_FROM_ME3 = 0x02AC00C2;
