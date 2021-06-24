@@ -12,7 +12,7 @@
 */
 
 #ifdef _MSC_VER
-	#pragma pack ( push, 0x4 )
+#pragma pack ( push, 0x4 )
 #endif
 
 /*
@@ -112,7 +112,7 @@ struct FMPDLCInfo
 {
 	TArray< struct FString >                           MapPackageNames;                                  		// 0x0000 (0x000C) [0x0000000000500000]              ( CPF_NeedCtorLink )
 	int                                                ModuleID;                                         		// 0x000C (0x0004) [0x0000000000000000]              
-	void*                                              PrettyName;                                       		// 0x0010 (0x0004) [0x0000000000000000]              
+	void* PrettyName;                                       		// 0x0010 (0x0004) [0x0000000000000000]              
 };
 
 // ScriptStruct SFXOnlineFoundation.SFXOnlineDefine.SFXOnlineRankNotification
@@ -213,7 +213,7 @@ struct FLeaderboardMapGroup
 struct FPatchLeaderboardDefinitionExtra
 {
 	int                                                nID;                                              		// 0x0000 (0x0004) [0x0000000000100000]              
-	void*                                              srTitleStrRef;                                    		// 0x0004 (0x0004) [0x0000000000100000]              
+	void* srTitleStrRef;                                    		// 0x0004 (0x0004) [0x0000000000100000]              
 	unsigned long                                      bUsesLocalString : 1;                             		// 0x0008 (0x0004) [0x0000000000100000] [0x00000001] 
 };
 
@@ -222,7 +222,7 @@ struct FPatchLeaderboardDefinitionExtra
 struct FRankBypassNotification
 {
 	struct FString                                     sEntityName;                                      		// 0x0000 (0x000C) [0x0000000000500000]              ( CPF_NeedCtorLink )
-	void*                                              srMessage;                                        		// 0x000C (0x0004) [0x0000000000100000]              
+	void* srMessage;                                        		// 0x000C (0x0004) [0x0000000000100000]              
 };
 
 // ScriptStruct SFXOnlineFoundation.ISFXOnlineComponentLogin.SFXOnlineAccountCountryListItem
@@ -356,8 +356,8 @@ struct FRankChangeNotificationRawData
 	struct FString                                     sPreviousFriendRankBlob;                          		// 0x0000 (0x000C) [0x0000000000400000]              ( CPF_NeedCtorLink )
 	TArray< struct FLeaderboardRecord >                aRankResults;                                     		// 0x000C (0x000C) [0x0000000000400000]              ( CPF_NeedCtorLink )
 	int                                                nPreviousLocalUserRank;                           		// 0x0018 (0x0004) [0x0000000000000000]              
-	void*                                              srFriendBeatMe;                                   		// 0x001C (0x0004) [0x0000000000000000]              
-	void*                                              srFriendBeatByMe;                                 		// 0x0020 (0x0004) [0x0000000000000000]              
+	void* srFriendBeatMe;                                   		// 0x001C (0x0004) [0x0000000000000000]              
+	void* srFriendBeatByMe;                                 		// 0x0020 (0x0004) [0x0000000000000000]              
 };
 
 // ScriptStruct SFXOnlineFoundation.SFXOnlineComponentBlazeLogin.AutoConnectAccount
@@ -393,8 +393,8 @@ struct FBlazeStatsRequest
 struct FSFXOnlineImageRequest
 {
 	struct FString                                     mImageName;                                       		// 0x0000 (0x000C) [0x0000000000400000]              ( CPF_NeedCtorLink )
-	class USFXOnlineJobHTTPRequest*                    mJob;                                             		// 0x000C (0x0004) [0x0000000000000000]              
-	class UTexture2D*                                  mDynamicImage;                                    		// 0x0010 (0x0004) [0x0000000000000000]              
+	class USFXOnlineJobHTTPRequest* mJob;                                             		// 0x000C (0x0004) [0x0000000000000000]              
+	class UTexture2D* mDynamicImage;                                    		// 0x0010 (0x0004) [0x0000000000000000]              
 	unsigned long                                      mCompleted : 1;                                   		// 0x0014 (0x0004) [0x0000000000000000] [0x00000001] 
 };
 
@@ -458,7 +458,7 @@ struct FSFXCachedAchievements
 	TArray< struct FAchievementDetails >               Achievements;                                     		// 0x0000 (0x000C) [0x0000000000400000]              ( CPF_NeedCtorLink )
 	int                                                PlayerNum;                                        		// 0x000C (0x0004) [0x0000000000000000]              
 	int                                                TitleId;                                          		// 0x0010 (0x0004) [0x0000000000000000]              
-	class USurface*                                    TempImage;                                        		// 0x0014 (0x0004) [0x0000000000000002]              ( CPF_Const )
+	class USurface* TempImage;                                        		// 0x0014 (0x0004) [0x0000000000000002]              ( CPF_Const )
 	unsigned char                                      ReadState;                                        		// 0x0018 (0x0001) [0x0000000000000000]              
 };
 
@@ -469,7 +469,7 @@ struct FSFXProfileSettingsCache
 	TArray< struct FScriptDelegate >                   ReadDelegates;                                    		// 0x0000 (0x000C) [0x0000000000400000]              ( CPF_NeedCtorLink )
 	TArray< struct FScriptDelegate >                   WriteDelegates;                                   		// 0x000C (0x000C) [0x0000000000400000]              ( CPF_NeedCtorLink )
 	TArray< struct FScriptDelegate >                   ProfileDataChangedDelegates;                      		// 0x0018 (0x000C) [0x0000000000400000]              ( CPF_NeedCtorLink )
-	class UOnlineProfileSettings*                      Profile;                                          		// 0x0024 (0x0004) [0x0000000000000000]              
+	class UOnlineProfileSettings* Profile;                                          		// 0x0024 (0x0004) [0x0000000000000000]              
 };
 
 // ScriptStruct SFXOnlineFoundation.SFXOnlineComponentUnrealPlayer.BioPerUserDelegateLists
@@ -508,7 +508,7 @@ struct FTalkerPriority
 // 0x0020(0x002C - 0x000C)
 struct FSFXOnlineRemoteTalker : FRemoteTalker
 {
-	struct FTalkerPriority                             LocalPriorities[ 0x4 ];                           		// 0x000C (0x0020) [0x0000000000000000]              
+	struct FTalkerPriority                             LocalPriorities[0x4];                           		// 0x000C (0x0020) [0x0000000000000000]              
 };
 
 // ScriptStruct SFXOnlineFoundation.SFXOnlineComponentXenonLiveParty.PartyGameInviteDelegates
@@ -543,9 +543,9 @@ struct FMPMapInfo
 	struct FVector                                     GalaxyAtWarMapPosition;                           		// 0x0018 (0x000C) [0x0000000000000000]              
 	struct FName                                       MusicEventName;                                   		// 0x0024 (0x0008) [0x0000000000000000]              
 	int                                                Id;                                               		// 0x002C (0x0004) [0x0000000000000000]              
-	void*                                              PrettyName;                                       		// 0x0030 (0x0004) [0x0000000000000000]              
-	void*                                              Description;                                      		// 0x0034 (0x0004) [0x0000000000000000]              
-	void*                                              GalaxyAtWarMapSubtitle;                           		// 0x0038 (0x0004) [0x0000000000000000]              
+	int PrettyName;                                       		// 0x0030 (0x0004) [0x0000000000000000]              
+	int Description;                                      		// 0x0034 (0x0004) [0x0000000000000000]              
+	int GalaxyAtWarMapSubtitle;                           		// 0x0038 (0x0004) [0x0000000000000000]              
 	unsigned long                                      EveryoneHasThisMap : 1;                           		// 0x003C (0x0004) [0x0000000000000000] [0x00000001] 
 };
 
@@ -555,8 +555,8 @@ struct FMPPrivacyInfo
 {
 	struct FString                                     Image;                                            		// 0x0000 (0x000C) [0x0000000000400000]              ( CPF_NeedCtorLink )
 	int                                                Id;                                               		// 0x000C (0x0004) [0x0000000000000000]              
-	void*                                              Name;                                             		// 0x0010 (0x0004) [0x0000000000000000]              
-	void*                                              AllCapsName;                                      		// 0x0014 (0x0004) [0x0000000000000000]              
+	void* Name;                                             		// 0x0010 (0x0004) [0x0000000000000000]              
+	void* AllCapsName;                                      		// 0x0014 (0x0004) [0x0000000000000000]              
 };
 
 // ScriptStruct SFXOnlineFoundation.SFXOnlineGameSettings.MPEnemyInfo
@@ -566,8 +566,8 @@ struct FMPEnemyInfo
 	struct FString                                     Image;                                            		// 0x0000 (0x000C) [0x0000000000400000]              ( CPF_NeedCtorLink )
 	struct FString                                     WaveClass;                                        		// 0x000C (0x000C) [0x0000000000400000]              ( CPF_NeedCtorLink )
 	int                                                Id;                                               		// 0x0018 (0x0004) [0x0000000000000000]              
-	void*                                              Name;                                             		// 0x001C (0x0004) [0x0000000000000000]              
-	void*                                              AllCapsName;                                      		// 0x0020 (0x0004) [0x0000000000000000]              
+	int Name;                                             		// 0x001C (0x0004) [0x0000000000000000]              
+	int AllCapsName;                                      		// 0x0020 (0x0004) [0x0000000000000000]              
 };
 
 // ScriptStruct SFXOnlineFoundation.SFXOnlineGameSettings.MPChallengeInfo
@@ -576,8 +576,8 @@ struct FMPChallengeInfo
 {
 	struct FString                                     Image;                                            		// 0x0000 (0x000C) [0x0000000000400000]              ( CPF_NeedCtorLink )
 	int                                                Id;                                               		// 0x000C (0x0004) [0x0000000000000000]              
-	void*                                              Name;                                             		// 0x0010 (0x0004) [0x0000000000000000]              
-	void*                                              AllCapsName;                                      		// 0x0014 (0x0004) [0x0000000000000000]              
+	int                                                Name;                                             		// 0x0010 (0x0004) [0x0000000000000000]              
+	int                                                AllCapsName;                                      		// 0x0014 (0x0004) [0x0000000000000000]              
 };
 
 // ScriptStruct SFXOnlineFoundation.SFXOnlineHTTPRequest.HTTPParameter
@@ -592,12 +592,12 @@ struct FHTTPParameter
 // 0x000D
 struct FSFXOnlineComponentDescription
 {
-	class UClass*                                      className;                                        		// 0x0000 (0x0004) [0x0000000000000000]              
+	class UClass* className;                                        		// 0x0000 (0x0004) [0x0000000000000000]              
 	struct FName                                       PlatformName;                                     		// 0x0004 (0x0008) [0x0000000000000000]              
 	unsigned char                                      ComponentType;                                    		// 0x000C (0x0001) [0x0000000000000000]              
 };
 
 
 #ifdef _MSC_VER
-	#pragma pack ( pop )
+#pragma pack ( pop )
 #endif

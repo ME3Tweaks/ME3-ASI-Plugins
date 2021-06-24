@@ -10,13 +10,91 @@
 #include <vector>
 #include <locale> 
 #include <codecvt>
+#ifndef _NOSDK
 #include "SdkHeaders.h"
+#endif
+
+
 using namespace std;
 
-typedef void(__thiscall *tProcessEvent)(class UObject *, class UFunction *, void *, void *);
+char GetBit(int value, int bit) {
+	return (value >> bit) & 1;
+}
+
+#ifndef _NOSDK
+typedef void(__thiscall* tProcessEvent)(class UObject*, class UFunction*, void*, void*);
 tProcessEvent ProcessEvent = (tProcessEvent)0x00453120;
 
-const std::string string_format(const char * const zcFormat, ...) {
+/// <summary>
+/// Gets objects in memory of a specific class type. Returns a TArray with objects that can be casted to that type.
+/// </summary>
+/// <param name="type"></param>
+/// <returns></returns>
+TArray<UObject*> FindObjectsOfType(UClass* type)
+{
+	TArray<UObject*> foundObjects;
+	const auto objCount = UObject::GObjObjects()->Count;
+	const auto objArray = UObject::GObjObjects()->Data;
+	for (auto j = 0; j < objCount; j++)
+	{
+		auto obj = objArray[j];
+		if (obj && obj->IsA(type))
+		{
+			const auto name = obj->Name.GetName();
+			if (strstr(name, "Default_"))// || actor->bStatic || !actor->bMovable)
+			{
+				continue;
+			}
+			foundObjects.Add(obj);
+		}
+	}
+	return foundObjects;
+}
+
+/// <summary>
+/// Gets the first object in memory of the specified type. Ensure you check for NULL.
+/// </summary>
+/// <param name="type"></param>
+/// <returns></returns>
+UObject* FindObjectOfType(UClass* type)
+{
+	const auto objCount = UObject::GObjObjects()->Count;
+	const auto objArray = UObject::GObjObjects()->Data;
+	for (auto j = 0; j < objCount; j++)
+	{
+		auto obj = objArray[j];
+		if (obj && obj->IsA(type))
+		{
+			const auto name = obj->Name.GetName();
+			if (strstr(name, "Default_"))// || actor->bStatic || !actor->bMovable)
+			{
+				continue;
+			}
+			return obj;
+		}
+	}
+	return NULL;
+}
+
+std::string GuidToString(FGuid guid)
+{
+	char guid_cstr[39];
+	snprintf(guid_cstr, sizeof(guid_cstr),
+		"{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
+		guid.A, guid.B, guid.C,
+		GetBit(guid.D, 0), GetBit(guid.D, 1), GetBit(guid.D, 2), GetBit(guid.D, 3),
+		GetBit(guid.D, 4), GetBit(guid.D, 5), GetBit(guid.D, 6), GetBit(guid.D, 7));
+
+	return std::string(guid_cstr);
+}
+
+template<typename T>
+bool IsA(UObject* object) {
+	return object->IsA(T::StaticClass());
+}
+#endif
+
+const std::string string_format(const char* const zcFormat, ...) {
 
 	// initialize use of the variable argument array
 	va_list vaArgs;
@@ -38,6 +116,11 @@ const std::string string_format(const char * const zcFormat, ...) {
 	return std::string(zc.data(), iLen);
 }
 
+/// <summary>
+/// Converts a widestring (wstring) to wchar_t
+/// </summary>
+/// <param name="wstr"></param>
+/// <returns></returns>
 inline std::string ws2s(const std::wstring& wstr)
 {
 	using convert_typeX = std::codecvt_utf8<wchar_t>;
@@ -46,12 +129,30 @@ inline std::string ws2s(const std::wstring& wstr)
 	return converterX.to_bytes(wstr);
 }
 
+/// <summary>
+/// Converts a string to a wide string
+/// </summary>
+/// <param name="multi"></param>
+/// <returns></returns>
+std::wstring s2ws(const std::string& multi) {
+	std::wstring wide; wchar_t w; mbstate_t mb{};
+	size_t n = 0, len = multi.length() + 1;
+	while (auto res = mbrtowc(&w, multi.c_str() + n, len - n, &mb)) {
+		if (res == size_t(-1) || res == size_t(-2))
+			throw "invalid encoding";
+
+		n += res;
+		wide += w;
+	}
+	return wide;
+}
+
 class ME3TweaksASILogger
 {
 public:
-	char* logfname;
+	const char* logfname;
 
-	ME3TweaksASILogger(char* loggername, char* _logfname, bool console = true) {
+	ME3TweaksASILogger(const char* loggername, const char* _logfname, bool console = true) {
 		logfname = _logfname;
 		fopen_s(&log, logfname, "w");
 
@@ -82,10 +183,20 @@ public:
 		writeToLog("--------------------------------------------------------\n", false);
 	}
 
+	/// <summary>
+	/// Writes the specified string to the log file on disk.
+	/// </summary>
+	/// <param name="str"></param>
+	/// <param name="bTimeStamp"></param>
 	void writeToDiskOnly(const wstring str, const bool bTimeStamp) {
 		writeToDiskOnly(ws2s(str), bTimeStamp);
 	}
 
+	/// <summary>
+	/// Writes the specified string to the log file on disk.
+	/// </summary>
+	/// <param name="str"></param>
+	/// <param name="bTimeStamp"></param>
 	void writeToDiskOnly(string str, bool bTimeStamp) {
 		if (bTimeStamp) {
 			string timeStamp = getTimestampStr();
@@ -101,25 +212,49 @@ public:
 		}
 	}
 
-	void writeToConsoleOnly(const wstring str, const bool bTimeStamp) {
-		writeToConsoleOnly(ws2s(str), bTimeStamp);
+	/// <summary>
+	/// Writes the specified string to the console only. Ensure you add a newline yourself.
+	/// </summary>
+	/// <param name="str"></param>
+	/// <param name="bTimeStamp"></param>
+	void writeToConsoleOnly(const wstring str, const bool bTimeStamp, bool newLine = false) {
+		writeToConsoleOnly(ws2s(str), bTimeStamp, newLine);
 	}
 
-	void writeToConsoleOnly(string str, bool bTimeStamp) {
+	/// <summary>
+	/// Writes the specified string to the console only. Ensure you add a newline yourself.
+	/// </summary>
+	/// <param name="str"></param>
+	/// <param name="bTimeStamp"></param>
+	void writeToConsoleOnly(string str, bool bTimeStamp, bool newLine = false) {
 		if (bTimeStamp) {
 			string timeStamp = getTimestampStr();
 			std::cout << timeStamp;
+
 			//free((char*)timeStamp);
 		}
-
 		std::cout << str;
+		if (newLine)
+		{
+			std::cout << endl;
+		}
 	}
 
-	void writeToLog(const wstring str, const bool bTimeStamp) {
-		writeToLog(ws2s(str), bTimeStamp);
+	/// <summary>
+	/// Writes to both the console and the log file.
+	/// </summary>
+	/// <param name="str"></param>
+	/// <param name="bTimeStamp"></param>
+	void writeToLog(const wstring str, const bool bTimeStamp, bool newLine = false) {
+		writeToLog(ws2s(str), bTimeStamp, newLine);
 	}
 
-	void writeToLog(string str, bool bTimeStamp) {
+	/// <summary>
+	/// Writes to both the console and the log file.
+	/// </summary>
+	/// <param name="str"></param>
+	/// <param name="bTimeStamp"></param>
+	void writeToLog(string str, bool bTimeStamp, bool newLine = false) {
 		if (bTimeStamp) {
 			string timeStamp = getTimestampStr();
 			std::cout << timeStamp;
@@ -130,7 +265,15 @@ public:
 			std::cout << "LOG ISNT INITALIZED";
 		}*/
 		fprintf(log, "%s", str.c_str());
+		if (newLine)
+		{
+			fprintf(log, "\n");
+		}
 		std::cout << str;
+		if (newLine)
+		{
+			std::cout << endl;
+		}
 
 		if (numLinesWritten > 10) {
 			fflush(log);
@@ -166,7 +309,7 @@ private:
 };
 
 
-/*Checks if w1 is part of w2*/
+/*Checks if w2 is part of w1*/
 bool isPartOf(char* w1, char* w2)
 {
 	int i = 0;
@@ -198,25 +341,4 @@ std::string wchar2string(wchar_t* str)
 	while (*str)
 		mystring += (char)*str++;
 	return  mystring;
-}
-
-char GetBit(int value, int bit) {
-	return (value >> bit) & 1;
-}
-
-std::string GuidToString(FGuid guid)
-{
-	char guid_cstr[39];
-	snprintf(guid_cstr, sizeof(guid_cstr),
-		"{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
-		guid.A, guid.B, guid.C,
-		GetBit(guid.D, 0), GetBit(guid.D, 1), GetBit(guid.D, 2), GetBit(guid.D, 3),
-		GetBit(guid.D, 4), GetBit(guid.D, 5), GetBit(guid.D, 6), GetBit(guid.D, 7));
-
-	return std::string(guid_cstr);
-}
-
-template<typename T>
-bool IsA(UObject* object) {
-	return object->IsA(T::StaticClass());
 }
